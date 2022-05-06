@@ -1,10 +1,21 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import styles from '../../styles/Home.module.css'
+import { Wrapper, Status } from "@googlemaps/react-wrapper";
+import { useEffect, useRef, useState } from 'react';
+import MapsGoogle from '../../components/Maps';
+// import Script from "next/script";
+
 
 
 const Home: NextPage = () => {
+
+  const render = (status: Status) => {
+    return <h1>{status}</h1>;
+  };
+
+
   return (
     <div className={styles.container}>
       <Head>
@@ -15,27 +26,19 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          GPS
         </h1>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.tsx</code>
-        </p>
+        <Wrapper 
+          apiKey={"AIzaSyAKmAuVwbZG4H9-msa3CVvbNVm6Jx4Bltg"}
+          render={render}
+          >
+          <MapsGoogle 
+            center={center} 
+            zoom={zoom}
+          />
+        </Wrapper>
 
-        <div className={styles.grid}>
-          <a href="./gps" className={styles.card}>
-            <h2>GPS &rarr;</h2>
-          </a>
-
-          <a href="./camera" className={styles.card}>
-            <h2>Camera &rarr;</h2>
-          </a>
-
-          <a href="./iframe" className={styles.card}>
-            <h2>iframe &rarr;</h2>
-          </a>       
-        </div>
       </main>
 
       <footer className={styles.footer}>

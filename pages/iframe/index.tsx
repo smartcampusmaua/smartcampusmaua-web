@@ -1,10 +1,13 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import styles from '../styles/Home.module.css'
-
+import { useEffect } from 'react'
+import styles from '../../styles/Home.module.css'
 
 const Home: NextPage = () => {
+    
+
+
   return (
     <div className={styles.container}>
       <Head>
@@ -15,27 +18,16 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          Camera
         </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.tsx</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="./gps" className={styles.card}>
-            <h2>GPS &rarr;</h2>
-          </a>
-
-          <a href="./camera" className={styles.card}>
-            <h2>Camera &rarr;</h2>
-          </a>
-
-          <a href="./iframe" className={styles.card}>
-            <h2>iframe &rarr;</h2>
-          </a>       
-        </div>
+        <iframe 
+          src="https://smartcampus.maua.br" 
+          width={"100%"} 
+          height={720} 
+          frameBorder={0} 
+          allow='accelerometer'
+          >
+        </iframe>
       </main>
 
       <footer className={styles.footer}>
