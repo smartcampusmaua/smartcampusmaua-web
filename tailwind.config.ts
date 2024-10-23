@@ -15,9 +15,9 @@ const config: Config = {
         'outfit': ['Outfit', 'sans-serif']
       },
       colors: {
-        'primary': '#77DD42',
-        'secondary': '#48C477',
-        'tertiary': '#011627'
+        'gms-primary': '#77DD42',
+        'gms-secondary': '#48C477',
+        'gms-tertiary': '#011627'
       },
       boxShadow: {
         'inner-light': 'inset 0 0 5px rgba(0,0,0,.2)',

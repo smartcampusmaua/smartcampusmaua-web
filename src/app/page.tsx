@@ -32,7 +32,7 @@ export default function Page() {
             <div className="mt-20 h-40">
               {!loading ? (
                   <>
-                    <h1 className={`text-center font-outfit text-6xl font-medium tracking-wider ${montserrat.className} antialiased`}>
+                    <h1 className={`text-center font-outfit text-5xl font-medium tracking-wider ${montserrat.className} antialiased`}>
                       SmartCampus Mauá
                     </h1>
                     <div className="mt-28 flex justify-center">
