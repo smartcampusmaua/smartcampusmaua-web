@@ -1,5 +1,6 @@
 "use client";
 
+import {montserrat} from "@/app/ui/fonts";
 import { useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -23,20 +24,20 @@ export default function Page() {
   return (
       <>
         <Head>
-          <title>EcoVision</title>
+          <title>SmartCampus Mauá</title>
         </Head>
-        <div className="flex h-screen items-center justify-center bg-white">
+        <div className="flex h-screen items-center justify-center bg-neutral-100">
           <div>
-            <Image className="mx-auto h-40" src="/images/logo.svg" alt="EcoVision" width={160} height={160} />
-            <div className="mt-5 h-40">
+            <Image className="mx-auto w-64 object-contain" src="/images/logo_maua.svg" alt="Instituto Mauá de Tecnologia" width={160} height={160} />
+            <div className="mt-20 h-40">
               {!loading ? (
                   <>
-                    <h1 className="text-center font-outfit text-6xl font-medium tracking-wider text-primary">
-                      Eco<span className="text-tertiary">Vision</span>
+                    <h1 className={`text-center font-outfit text-6xl font-medium tracking-wider ${montserrat.className} antialiased`}>
+                      SmartCampus Mauá
                     </h1>
-                    <div className="mt-20 flex justify-center">
+                    <div className="mt-28 flex justify-center">
                       <button
-                          className="mx-auto flex items-center space-x-5 rounded-full bg-neutral-200 px-7 py-4 transition duration-150 ease-in hover:bg-neutral-300"
+                          className="mx-auto flex items-center space-x-5 rounded-full bg-white px-7 py-4 transition duration-150 ease-in hover:bg-neutral-300" style={{ boxShadow: '8px 8px 25px rgba(0,0,0,.2)' }}
                           onClick={handleMicrosoftLogin}
                       >
                         <span className="text-center text-[0.825rem] uppercase tracking-wider">ENTRAR COM</span>

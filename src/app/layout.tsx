@@ -4,7 +4,7 @@ import "./globals.css";
 import React from "react";
 
 export const metadata: Metadata = {
-  title: "EcoVision",
+  title: "SmartCampus Mauá",
   description: "SmartCampus Mauá",
 };
 
