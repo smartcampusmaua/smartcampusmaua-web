@@ -17,7 +17,8 @@ const config: Config = {
       colors: {
         'gms-primary': '#77DD42',
         'gms-secondary': '#48C477',
-        'gms-tertiary': '#011627'
+        'gms-tertiary': '#011627',
+        'maua_blue': '#1c2a90'
       },
       boxShadow: {
         'inner-light': 'inset 0 0 5px rgba(0,0,0,.2)',
