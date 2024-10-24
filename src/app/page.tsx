@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 export default function Page() {
   const router = useRouter();
   
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const apiBaseUrl = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}`;
 
   const loginUrl = `${apiBaseUrl}/auth/login`;
 
