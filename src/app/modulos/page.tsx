@@ -11,7 +11,7 @@ export default function Page() {
   const router = useRouter();
 
   const handleMicrosoftLogout = async () => {
-    router.push(`${process.env.NEXT_PUBLIC_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/auth/logout`)
+    router.push(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/auth/logout`)
   };
 
   useEffect(() => {
