@@ -66,9 +66,9 @@ ENV PORT=3000
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
 ENV HOSTNAME="0.0.0.0"
 
-ENV NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL="http://smartcampusmaua-server-service"
-ENV NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT="3001"
-ENV NEXT_PUBLIC_GMS_WEB_URL="http://gms-web-service"
-ENV NEXT_PUBLIC_GMS_WEB_PORT="3002"
+ENV NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL=http://smartcampusmaua-server-service
+ENV NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT=3001
+ENV NEXT_PUBLIC_GMS_WEB_URL=http://gms-web-service
+ENV NEXT_PUBLIC_GMS_WEB_PORT=3002
 
 CMD ["node", "server.js"]
