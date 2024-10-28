@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
     }
   } else {
     if (request.nextUrl.pathname.endsWith('/modulos')) {
-        return NextResponse.redirect(new URL(`${process.env.SMARTCAMPUSMAUA_WEB_URL}:${process.env.SMARTCAMPUSMAUA_WEB_PORT}`))
+        return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_PORT}`))
     }
   }
 }

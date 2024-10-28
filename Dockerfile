@@ -27,10 +27,12 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
-ENV NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL=https://smartcampusmaua-k8s.maua.br
-ENV NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT=443
-ENV NEXT_PUBLIC_GMS_WEB_URL=https://smartcampusmaua-k8s.maua.br
-ENV NEXT_PUBLIC_GMS_WEB_PORT=443
+ENV NEXT_PUBLIC_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL=https://smartcampusmaua-k8s.maua.br
+ENV NEXT_PUBLIC_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT=443
+ENV NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL=http://smartcampusmaua-server-service
+ENV NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT=3001
+ENV NEXT_PUBLIC_GMS_WEB_URL=http://gms-web-service
+ENV NEXT_PUBLIC_GMS_WEB_PORT=3002
 
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
