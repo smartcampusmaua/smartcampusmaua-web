@@ -8,16 +8,18 @@ import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const router = useRouter();
-  
-  const apiBaseUrl = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}`;
 
-  const loginUrl = `${apiBaseUrl}/auth/login`;
 
   const [loading, setLoading] = useState(false);
 
   const handleMicrosoftLogin = async () => {
     setLoading(true);
-    router.push(loginUrl)
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/login`);
+    if (!response.ok) {
+        throw new Error('Erro ao obter o nome de exibição');
+    }
+    const data = await response.json();
+    router.push(data.loginUrl)
     setLoading(false);
   };
 
