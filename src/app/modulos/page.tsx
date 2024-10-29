@@ -11,13 +11,13 @@ export default function Page() {
   const router = useRouter();
 
   const handleMicrosoftLogout = async () => {
-    router.push(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/auth/logout`)
+    router.push(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/logout`)
   };
 
   useEffect(() => {
     const fetchDisplayName = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/auth/displayname`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/displayname`);
         if (!response.ok) {
           throw new Error('Erro ao obter o nome de exibição');
         }
@@ -30,7 +30,7 @@ export default function Page() {
     };
 
     fetchDisplayName(); // Chama a função para buscar o nome de exibição
-  }, [`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/auth/displayname`]); 
+  }, [`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/displayname`]); 
     
   return (
       <>

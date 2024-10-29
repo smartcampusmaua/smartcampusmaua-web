@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Defina a URL da API do NestJS que verifica o estado da sessão
-const CHECK_SESSION_URL = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/auth/check-session`;
+const CHECK_SESSION_URL = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/check-session`;
 
 export async function middleware(request: NextRequest) {
   // Obtém o cookie da requisição
