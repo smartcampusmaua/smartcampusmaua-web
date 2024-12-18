@@ -47,7 +47,7 @@ export default function Page() {
                 <button onClick={handleMicrosoftLogout}>Sair</button>
             </div>
             <div className='grid mt-10 place-items-center text-center'>
-                <a href={`${process.env.NEXT_PUBLIC_GMS_WEB_URL}:${process.env.NEXT_PUBLIC_GMS_WEB_PORT}`}>
+                <a href={`${process.env.NEXT_PUBLIC_GMS_WEB_URL}:${process.env.NEXT_PUBLIC_GMS_WEB_PORT}/gms`}>
                 <div className='w-72 p-6 hover:opacity-75 transition rounded-xl flex flex-col space-y-3 justify-center bg-gms-secondary' style={{ boxShadow: '8px 8px 25px rgba(0,0,0,.2)' }}>
                     <img className="object-contain h-20" src='images/logo_gms_filled.svg' alt="EcoVision" />
                     <span className={`text-2xl text-gms-tertiary ${outfit.className} antialiased`}><span className="text-white">Eco</span>Vision</span>
