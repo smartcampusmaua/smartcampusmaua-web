@@ -14,8 +14,7 @@ export default function Page() {
 
   const handleMicrosoftLogin = async () => {
     setLoading(true);
-    // const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/login`);
-    const response = await fetch(`https://smartcampus-k8s.maua.br/api/auth/login`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/login`);
     if (!response.ok) {
         throw new Error('Erro ao obter o nome de exibição');
     }

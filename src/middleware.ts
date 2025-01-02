@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Defina a URL da API do NestJS que verifica o estado da sessão
-// const CHECK_SESSION_URL = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/check-session`;
-const CHECK_SESSION_URL = `https://smartcampus-k8s.maua.br/api/auth/check-session`;
+const CHECK_SESSION_URL = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/check-session`;
 
 export async function middleware(request: NextRequest) {
   // Obtém o cookie da requisição
@@ -24,13 +23,12 @@ export async function middleware(request: NextRequest) {
     }
   } else {
     if (request.nextUrl.pathname.endsWith('/modulos')) {
-      // return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_PORT}`))
-      return NextResponse.redirect(new URL(`https://smartcampus-k8s.maua.br`))
+        return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_PORT}`))
     }
   }
 }
 
 // Define as rotas ou padrões de URL que o middleware deve aplicar
 export const config = {
-  matcher: ['/','/modulos'], // Adapte para as suas rotas protegidas
+  matcher: ['/','/modulos','/sensores', '/alarmes', '/configuracoes'], // Adapte para as suas rotas protegidas
 };

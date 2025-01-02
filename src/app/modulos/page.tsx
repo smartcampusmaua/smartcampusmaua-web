@@ -11,15 +11,13 @@ export default function Page() {
   const router = useRouter();
 
   const handleMicrosoftLogout = async () => {
-    // router.push(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/logout`)
-    router.push(`https://smartcampus-k8s.maua.br/api/auth/logout`)
+    router.push(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/logout`)
   };
 
   useEffect(() => {
     const fetchDisplayName = async () => {
       try {
-        // const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/displayname`);
-        const response = await fetch(`https://smartcampus-k8s.maua.br/api/auth/displayname`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/displayname`);
         if (!response.ok) {
           throw new Error('Erro ao obter o nome de exibição');
         }
@@ -32,8 +30,7 @@ export default function Page() {
     };
 
     fetchDisplayName(); // Chama a função para buscar o nome de exibição
-  // }, [`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/displayname`]); 
-}, [`https://smartcampus-k8s.maua.br/api/auth/displayname`]); 
+  }, [`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/displayname`]); 
     
   return (
       <>
@@ -50,9 +47,8 @@ export default function Page() {
                 <button onClick={handleMicrosoftLogout}>Sair</button>
             </div>
             <div className='grid mt-10 place-items-center text-center'>
-            {/* <a href={`${process.env.NEXT_PUBLIC_GMS_WEB_URL}:${process.env.NEXT_PUBLIC_GMS_WEB_PORT}/gms`}> */}
-            <a href={`https://smartcampus-k8s.maua.br/gms`}>
-            <div className='w-72 p-6 hover:opacity-75 transition rounded-xl flex flex-col space-y-3 justify-center bg-gms-secondary' style={{ boxShadow: '8px 8px 25px rgba(0,0,0,.2)' }}>
+                <a href={`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_PORT}/gms/sensores`}>
+                <div className='w-72 p-6 hover:opacity-75 transition rounded-xl flex flex-col space-y-3 justify-center bg-gms-secondary' style={{ boxShadow: '8px 8px 25px rgba(0,0,0,.2)' }}>
                     <img className="object-contain h-20" src='images/logo_gms_filled.svg' alt="EcoVision" />
                     <span className={`text-2xl text-gms-tertiary ${outfit.className} antialiased`}><span className="text-white">Eco</span>Vision</span>
                 </div>
