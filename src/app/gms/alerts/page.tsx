@@ -160,9 +160,7 @@ const Alarmes = () => {
 
         <div className="3xl:grid-cols-6 grid grid-cols-3 justify-items-center gap-y-10 xl:grid-cols-4 2xl:grid-cols-5">
           {alarmesCurrentValues.map((alarme, index) => {
-            const isTriggered = alarme.triggerAt
-              ? alarme.triggerAt < alarme.trigger
-              : alarme.triggerAt > alarme.trigger;
+            const isTriggered = alarme.triggerAt == "higher" ? alarme.currentValue > alarme.trigger : alarme.currentValue < alarme.trigger;
 
             return (
               <div
