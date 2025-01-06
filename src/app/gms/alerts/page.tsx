@@ -34,10 +34,17 @@ const Alarmes = () => {
   }
   const [alarmesCurrentValues, setAlarmesCurrentValues] = useState<AlarmeValue[]>([]);
 
-  const deleteAlarme = (id: String) => {
-    const updatedAlarmes = alarmes.filter((alarme) => alarme.deveui !== id);
+  const deleteAlarme = (deveui, triggerType, trigger) => {
+    const updatedAlarmes = alarmesCurrentValues.filter(
+      (alarme) =>
+        alarme.deveui !== deveui ||
+        alarme.triggerType !== triggerType ||
+        alarme.trigger !== trigger
+    );
+
     setAlarmes(updatedAlarmes);
   };
+
 
   useEffect(() => {
     const getSensors = async () => {
@@ -164,7 +171,7 @@ const Alarmes = () => {
                 style={{ boxShadow: '8px 8px 25px rgba(0,0,0,.2)' }}
               >
                 <button
-                  onClick={() => { deleteAlarme(alarme.deveui); }}
+                  onClick={() => { deleteAlarme(alarme.deveui, alarme.triggerType, alarme.trigger); }}
                   className={`${isTriggered ? "text-white" : "text-black"} text-4xl ml-2`}
                 >
                   &times;
