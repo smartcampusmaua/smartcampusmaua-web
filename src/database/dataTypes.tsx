@@ -21,20 +21,18 @@ class Luz {
 }
 
 class Alarme {
-    id: number;
-    trigger: number;
-    triggerAtLowerThan: boolean;
-    triggerType: string;
-    currentValue: number;
+    deviceId: string;
+    trigger: string;
+    triggerAt: string; // higher / lower than trigger
+    triggerType: string; // boardVoltage
     local: string;
-    type: string;
+    type: string; // Smartlight
 
-    constructor(id: number, trigger: number, triggerAtLowerThan: boolean, triggerType: string, currentValue: number, local: string, type: string) {
-        this.id = id;
+    constructor(deviceId: string, trigger: string, triggerAt: string, triggerType: string, local: string, type: string) {
+        this.deviceId = deviceId;
         this.trigger = trigger;
-        this.triggerAtLowerThan = triggerAtLowerThan;
+        this.triggerAt = triggerAt;
         this.triggerType = triggerType;
-        this.currentValue = currentValue;
         this.local = local;
         this.type = type;
     }
@@ -67,9 +65,9 @@ class Local {
 
 class GenericSensor {
     constructor(
-        public name: String,
-        public type: String | null,
-        public deveui: String,
+        public name: string,
+        public type: string | null,
+        public deveui: string,
         public boardVoltage: number | null,
         public batteryVoltage: number | null,
         public humidity: number | null,
@@ -78,7 +76,7 @@ class GenericSensor {
         public movement: boolean | null,
         public pressure: number | null,
         public co2: number | null,
-        public local: String,
+        public local: string,
         // public date: Date, 
     ) {}
 }
