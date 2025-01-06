@@ -9,9 +9,12 @@ import Papa from 'papaparse';
 import { supabase, getData } from '@/database/supabaseClient';
 
 const Alarmes = () => {
+  const SMARTCAMPUSMAUA_SERVER = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}`;
+
     const [luzes, setLuzes] = useState<Luz[]>([]);
     const [alarmes, setAlarmes] = useState<Alarme[]>([]);
-    const [locals, setLocal] = useState<Local[]>([]);
+    // const [locals, setLocal] = useState<Local[]>([]);
+    const locals: Local[] =[]
     const [newAlarme, setNewAlarme] = useState({
         id: 0,
         trigger: '',
@@ -138,7 +141,8 @@ const Alarmes = () => {
         const updateDatabaseAlarmes = async () => {
             if (alarmes.length === 0) return;  // Skip if no alarms
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/email`);
+            // const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/email`);
+            const response = await fetch(`${SMARTCAMPUSMAUA_SERVER}/api/auth/email`);
             const dataEmail = await response.json();
 
             const queries = alarmes.map((alarme) => ({

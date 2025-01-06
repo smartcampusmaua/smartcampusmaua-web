@@ -6,18 +6,23 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Page() {
+  const SMARTCAMPUSMAUA_WEB = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_PORT}`;
+  const SMARTCAMPUSMAUA_SERVER = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}`;
+
   const [displayName, setDisplayName] = useState("Carregando..."); // Estado para o nome de exibição
 
   const router = useRouter();
 
   const handleMicrosoftLogout = async () => {
-    router.push(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/logout`)
+    // router.push(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/logout`)
+    router.push(`${SMARTCAMPUSMAUA_SERVER}/api/auth/logout`)
   };
 
   useEffect(() => {
     const fetchDisplayName = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/displayname`);
+        // const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/displayname`);
+        const response = await fetch(`${SMARTCAMPUSMAUA_SERVER}/api/auth/displayname`);
         if (!response.ok) {
           throw new Error('Erro ao obter o nome de exibição');
         }
@@ -30,7 +35,8 @@ export default function Page() {
     };
 
     fetchDisplayName(); // Chama a função para buscar o nome de exibição
-  }, [`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/displayname`]); 
+  // }, [`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/displayname`]); 
+}, [`${SMARTCAMPUSMAUA_SERVER}/api/auth/displayname`]); 
     
   return (
       <>
@@ -47,9 +53,11 @@ export default function Page() {
                 <button onClick={handleMicrosoftLogout}>Sair</button>
             </div>
             <div className='grid mt-10 place-items-center text-center'>
-                <a href={`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_PORT}/gms/sensores`}>
-                <div className='w-72 p-6 hover:opacity-75 transition rounded-xl flex flex-col space-y-3 justify-center bg-gms-secondary' style={{ boxShadow: '8px 8px 25px rgba(0,0,0,.2)' }}>
-                    <img className="object-contain h-20" src='images/logo_gms_filled.svg' alt="EcoVision" />
+            {/* <a href={`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_PORT}/gms/devices`}> */}
+            <a href={`${SMARTCAMPUSMAUA_WEB}/gms/devices`}>
+            <div className='w-72 p-6 hover:opacity-75 transition rounded-xl flex flex-col space-y-3 justify-center bg-gms-secondary' style={{ boxShadow: '8px 8px 25px rgba(0,0,0,.2)' }}>
+                <img className="object-contain h-20" src='/images/logo_gms_filled.svg' alt="EcoVision" />
+
                     <span className={`text-2xl text-gms-tertiary ${outfit.className} antialiased`}><span className="text-white">Eco</span>Vision</span>
                 </div>
                 </a>

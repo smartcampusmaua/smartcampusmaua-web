@@ -4,8 +4,15 @@ import Head from "next/head";
 import DashboardLayout from "@/app/gms/components/DashboardLayout";
 import { useState, useEffect } from "react";
 import { fetchAllSensors } from "@/database/timeseries";
-import { Luz, Local, GenericSensor } from "@/database/dataTypes";
-import { supabase, getData } from '@/database/supabaseClient';
+import { 
+  // Luz, 
+  // Local, 
+  GenericSensor 
+} from "@/database/dataTypes";
+import { 
+  supabase, 
+  // getData 
+} from '@/database/supabaseClient';
 
 const Sensores = () => {
     const [sensores, setSensors] = useState<GenericSensor[]>([]);
@@ -59,7 +66,7 @@ const Sensores = () => {
                         local,
                     );
                 });
-                const sortedSensors = newSensors.sort((a: {local: string}, b: {local: string}) =>
+                const sortedSensors: GenericSensor[] = newSensors.sort((a: {local}, b: {local}) => // RC-EDIT
                     a.local.localeCompare(b.local)
                 );
                 setSensors(sortedSensors);

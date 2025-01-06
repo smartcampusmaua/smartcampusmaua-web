@@ -68,8 +68,8 @@ class Local {
 class GenericSensor {
     constructor(
         public name: String,
-        public type: string | null,
-        public deveui: string,
+        public type: String | null,
+        public deveui: String,
         public boardVoltage: number | null,
         public batteryVoltage: number | null,
         public humidity: number | null,
@@ -78,7 +78,7 @@ class GenericSensor {
         public movement: boolean | null,
         public pressure: number | null,
         public co2: number | null,
-        public local: string,
+        public local: String,
         // public date: Date, 
     ) {}
 }

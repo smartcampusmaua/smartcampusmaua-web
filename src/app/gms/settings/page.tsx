@@ -2,10 +2,15 @@
 
 import Head from 'next/head';
 import DashboardLayout from "@/app/gms/components/DashboardLayout";
-import { useState, useEffect } from 'react';
+import { 
+  useState,
+  //  useEffect 
+  } from 'react';
 import { supabase } from '@/database/supabaseClient';
 
 const Configurations = () => {
+  const SMARTCAMPUSMAUA_SERVER = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}`;
+
     const [DDD, setDDD] = useState("");
     const [fone, setFone] = useState("");
     const [numIncompleto, setAviso] = useState(false);
@@ -33,8 +38,9 @@ const Configurations = () => {
 
     const updateDatabasePhones = async () => {
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/email`);
-        const dataEmail = await response.json();
+      // const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/email`);
+      const response = await fetch(`${SMARTCAMPUSMAUA_SERVER}/api/auth/email`);
+      const dataEmail = await response.json();
 
         const { error } = await supabase
             .from('User')

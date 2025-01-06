@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react";
 import { chartConfigs, ChartProps } from "../lib/chartConfigs";
-import { LineChart } from "./lineChart";
+// import { LineChart } from "./lineChart";
 
 
 
@@ -50,8 +50,8 @@ export function ChartDiv({
             })}
           </select>
         </div>
-        {deviceId && <LineChart fetchUrl={fetchApiUrl} chartConfigs={chartConfigs[chartType]}
-           />}
+        {/* {deviceId && <LineChart fetchUrl={fetchApiUrl} chartConfigs={chartConfigs[chartType]}
+           />} */}
       </dialog>
     </>
   )
