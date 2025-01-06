@@ -6,9 +6,8 @@ class Luz {
     temperature: number;
     movement: number; // Contador de pessoas que entraram na sala
     deviceId: string;
-    local: string;
 
-    constructor(boardVoltage: number, batteryVoltage: number, humidity: number, luminosity: number, temperature: number, movement: number, deviceId: string, local: string) {
+    constructor(boardVoltage: number, batteryVoltage: number, humidity: number, luminosity: number, temperature: number, movement: number, deviceId: string) {
         this.boardVoltage = boardVoltage;
         this.batteryVoltage = batteryVoltage;
         this.humidity = humidity;
@@ -16,7 +15,6 @@ class Luz {
         this.temperature = temperature;
         this.movement = movement;
         this.deviceId = deviceId;
-        this.local = local;
     }
 }
 
