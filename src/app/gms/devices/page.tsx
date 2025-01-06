@@ -97,7 +97,7 @@ const Sensores = () => {
   const [triggerType, setTriggerType] = useState('boardVoltage');
   const [trigger, setTrigger] = useState<string>('0');
   const [triggerAt, setTriggerAt] = useState<string>('higher');
-  const [newAlarm, setNewAlarm] = useState<Alarme>();
+  var [newAlarm, setNewAlarm] = useState<Alarme>();
   const [alarmError, setAlarmError] = useState<boolean>();
 
   const handleNewAlarm = () => {
@@ -116,6 +116,8 @@ const Sensores = () => {
   useEffect(() => {
     const updateDatabaseAlarmes = async () => {
       try {
+        if(newAlarm == null) return;
+
         const response = await fetch(`${SMARTCAMPUSMAUA_SERVER}/api/auth/email`);
         const dataEmail = await response.json();
 
@@ -163,7 +165,7 @@ const Sensores = () => {
                   Local: {alarmSensor.local}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
-                  DeviceId: {alarmSensor.deveui}
+                  DEVEUI: {alarmSensor.deveui}
                 </p>
                 <ul className="text-sm space-y-2">
                   {alarmSensor.boardVoltage && <li><strong>Board Voltage:</strong> {alarmSensor.boardVoltage} V</li>}
@@ -208,6 +210,14 @@ const Sensores = () => {
               >Criar alarme</button>
             </div>
           </div>
+          <div className="mt-4 text-5xl text-center font-bold">
+            {!alarmError && newAlarm ? (
+              <p className="text-green-500">Alarme inserido com sucesso</p>
+            ) : alarmError && newAlarm ?(
+              <p className="text-red-500">Por favor, preencha todos os campos</p>
+            ) : <p></p>
+          }
+          </div>
         </div>
       ) : (
         <div>
@@ -238,7 +248,7 @@ const Sensores = () => {
                   onChange={(e) => setSelectedFilter(e.target.value)}
                   className="border rounded p-3 w-full md:w-1/4 focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="deveui">DeviceId</option>
+                  <option value="deveui">Deveui</option>
                   <option value="local">Local</option>
                   <option value="name">Nome</option>
                   <option value="type">Tipo</option>
@@ -266,7 +276,7 @@ const Sensores = () => {
                     <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
                       Local: {sensor.local}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">DeviceId: {sensor.deveui}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">DEVEUI: {sensor.deveui}</p>
 
                     <ul className="text-sm space-y-2">
                       {sensor.boardVoltage && (

@@ -21,15 +21,15 @@ class Luz {
 }
 
 class Alarme {
-    deviceId: string;
+    deveui: string;
     trigger: string;
     triggerAt: string; // higher / lower than trigger
     triggerType: string; // boardVoltage
     local: string;
     type: string; // Smartlight
 
-    constructor(deviceId: string, trigger: string, triggerAt: string, triggerType: string, local: string, type: string) {
-        this.deviceId = deviceId;
+    constructor(deveui: string, trigger: string, triggerAt: string, triggerType: string, local: string, type: string) {
+        this.deveui = deveui;
         this.trigger = trigger;
         this.triggerAt = triggerAt;
         this.triggerType = triggerType;
