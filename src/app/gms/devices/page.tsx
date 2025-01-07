@@ -14,6 +14,8 @@ import {
   // getData 
 } from '@/database/supabaseClient';
 import { Alarme } from "@/database/dataTypes";
+import { formatDistanceToNow } from 'date-fns';
+import { pt } from 'date-fns/locale';
 
 const Sensores = () => {
   const [sensores, setSensors] = useState<GenericSensor[]>([]);
@@ -48,7 +50,7 @@ const Sensores = () => {
           return true;
         })
           .map((entry: any) => {
-            const { fields, tags, name } = entry;
+            const { fields, tags, name, timestamp} = entry;
             const { boardVoltage, batteryVoltage, humidity, luminosity, temperature, movement, pressure, co2 } = fields;
             const { deviceId, type } = tags;
 
@@ -67,6 +69,7 @@ const Sensores = () => {
               pressure,
               co2,
               local,
+              new Date(Number(timestamp) / 1000000)
             );
           });
         const sortedSensors: GenericSensor[] = newSensors.sort((a: { local }, b: { local }) => // RC-EDIT
@@ -319,6 +322,11 @@ const Sensores = () => {
                       {sensor.co2 && (
                         <li>
                           <strong>CO2:</strong> {sensor.co2} ppm
+                        </li>
+                      )}
+                      {sensor.timestamp && (
+                        <li>
+                          <strong>Tocou há: </strong> {formatDistanceToNow(new Date(sensor.timestamp), {locale: pt})}
                         </li>
                       )}
                     </ul>

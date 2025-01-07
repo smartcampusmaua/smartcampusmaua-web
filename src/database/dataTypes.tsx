@@ -77,7 +77,7 @@ class GenericSensor {
         public pressure: number | null,
         public co2: number | null,
         public local: string,
-        // public date: Date, 
+        public timestamp: Date, 
     ) {}
 }
 
