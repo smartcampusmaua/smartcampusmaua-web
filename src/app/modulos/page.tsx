@@ -55,10 +55,11 @@ export default function Page() {
             <div className='grid mt-10 place-items-center text-center'>
             {/* <a href={`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_WEB_PORT}/gms/devices`}> */}
             <a href={`${SMARTCAMPUSMAUA_WEB}/gms/devices`}>
-            <div className='w-72 p-6 hover:opacity-75 transition rounded-xl flex flex-col space-y-3 justify-center bg-gms-secondary' style={{ boxShadow: '8px 8px 25px rgba(0,0,0,.2)' }}>
-                <img className="object-contain h-20" src='/images/logo_gms_filled.svg' alt="EcoVision" />
+            
+            <div className='w-72 p-6 hover:opacity-75 transition rounded-xl flex flex-col space-y-3 justify-center bg-gray-200' style={{ boxShadow: '8px 8px 25px rgba(0,0,0,.2)' }} >
+                <img className="object-contain h-20" src='/images/logo_maua.svg' alt="IMT" />
 
-                    <span className={`text-2xl text-gms-tertiary ${outfit.className} antialiased`}><span className="text-white">Eco</span>Vision</span>
+                    <span className={`text-2xl text-gms-tertiary ${outfit.className} antialiased`}><span className="text-blue-900">SmartCampus Mauá</span> </span>
                 </div>
                 </a>
             </div>
