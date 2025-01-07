@@ -98,7 +98,7 @@ const Sensores = () => {
   const [trigger, setTrigger] = useState<string>('0');
   const [triggerAt, setTriggerAt] = useState<string>('higher');
   var [newAlarm, setNewAlarm] = useState<Alarme>();
-  const [alarmError, setAlarmError] = useState<boolean>();
+  // const [alarmError, setAlarmError] = useState<boolean>(); // Removendo até fazer um popup bonito ao invés do texto verde
 
   const handleNewAlarm = () => {
     const newAlarmData = new Alarme(
@@ -108,6 +108,7 @@ const Sensores = () => {
       triggerType,
       alarmSensor.local,
       alarmSensor.name,
+      false
     )
 
     setNewAlarm(newAlarmData);
@@ -130,16 +131,17 @@ const Sensores = () => {
 
         if (error) {
           console.error('Error appending alarm to database', error);
-          setAlarmError(true);
+          // setAlarmError(true);
         }
       } catch (error) {
         console.error('Unexpected error', error);
-        setAlarmError(true);
+        // setAlarmError(true);
       }
-      setAlarmError(false);
+      // setAlarmError(false);
     };
 
     updateDatabaseAlarmes();
+    setAlarmPopupOpen(false);
   }, [newAlarm]);
 
 
@@ -210,14 +212,14 @@ const Sensores = () => {
               >Criar alarme</button>
             </div>
           </div>
-          <div className="mt-4 text-5xl text-center font-bold">
+          {/* <div className="mt-4 text-5xl text-center font-bold">
             {!alarmError && newAlarm ? (
               <p className="text-green-500">Alarme inserido com sucesso</p>
             ) : alarmError && newAlarm ?(
               <p className="text-red-500">Por favor, preencha todos os campos</p>
             ) : <p></p>
           }
-          </div>
+          </div> */}
         </div>
       ) : (
         <div>

@@ -21,6 +21,7 @@ const Alarmes = () => {
     local: string;
     type: string; // Smartlight
     currentValue: string;
+    alreadyPlayed: boolean;
 
     constructor(deveui: string, trigger: string, triggerAt: string, triggerType: string, local: string, type: string, currentValue: string) {
       this.deveui = deveui;
@@ -30,6 +31,7 @@ const Alarmes = () => {
       this.local = local;
       this.type = type;
       this.currentValue = currentValue;
+      this.alreadyPlayed = false;
     }
   }
   const [alarmesCurrentValues, setAlarmesCurrentValues] = useState<AlarmeValue[]>([]);

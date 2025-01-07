@@ -25,14 +25,16 @@ class Alarme {
     triggerType: string; // boardVoltage
     local: string;
     type: string; // Smartlight
+    alreadyPlayed: boolean;
 
-    constructor(deveui: string, trigger: string, triggerAt: string, triggerType: string, local: string, type: string) {
+    constructor(deveui: string, trigger: string, triggerAt: string, triggerType: string, local: string, type: string, alreadyPlayed: boolean) {
         this.deveui = deveui;
         this.trigger = trigger;
         this.triggerAt = triggerAt;
         this.triggerType = triggerType;
         this.local = local;
         this.type = type;
+        this.alreadyPlayed = alreadyPlayed;
     }
 }
 
