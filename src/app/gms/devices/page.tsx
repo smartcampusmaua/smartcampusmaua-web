@@ -326,7 +326,7 @@ const Sensores = () => {
                       )}
                       {sensor.timestamp && (
                         <li>
-                          <strong>Tocou há: </strong> {formatDistanceToNow(new Date(sensor.timestamp), {locale: pt})}
+                          <strong>Atualizado há: </strong> {formatDistanceToNow(new Date(sensor.timestamp), {locale: pt})}
                         </li>
                       )}
                     </ul>
