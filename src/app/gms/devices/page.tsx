@@ -181,6 +181,7 @@ const Sensores = () => {
                   {alarmSensor.movement && <li><strong>Movement:</strong> {alarmSensor.movement}</li>}
                   {alarmSensor.pressure && <li><strong>Pressure:</strong> {alarmSensor.pressure} Pa</li>}
                   {alarmSensor.co2 && <li><strong>CO2:</strong> {alarmSensor.co2} ppm</li>}
+                  {alarmSensor.timestamp && <li><strong>Atualizado há:</strong> {formatDistanceToNow(new Date(alarmSensor.timestamp), {locale: pt})}</li>}
                 </ul>
               </div>
             </div>
