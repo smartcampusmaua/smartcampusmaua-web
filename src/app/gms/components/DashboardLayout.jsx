@@ -67,17 +67,17 @@ const Layout = ({ children }) => {
                 </svg>
               </button>
               <div>
-                <img className="h-8 dark:hidden" src="/images/logo.svg" alt="EcoVision" />
-                <img className="hidden h-8 dark:block" src="/images/logo_negative.svg" alt="EcoVision" />
+                <img className="h-10 dark:hidden" src="/images/logo_maua.svg" alt="IMT- Instituto Mauá de Tecnologia" />
+                <img className="hidden h-10 dark:block" src="/images/logo_maua.svg" alt="IMT- Instituto Mauá de Tecnologia" />
               </div>
-              <p className="font-outfit font-medium text-primary lg:text-2xl text-xl">
-                Eco<span className="text-tertiary dark:text-white">Vision</span>
-                {true && (
+              <p className="font-outfit font-medium lg:text-2xl text-xl">
+                Smart<span className="dark:text-white">Campus Mauá</span>
+                {/* {true && (
                   <span
                     className="ml-1.5 font-outfit font-normal text-tertiary">
                     | admin
                   </span>
-                )}
+                )} */}
               </p>
             </div>
           </div>

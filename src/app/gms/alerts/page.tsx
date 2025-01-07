@@ -36,15 +36,25 @@ const Alarmes = () => {
   }
   const [alarmesCurrentValues, setAlarmesCurrentValues] = useState<AlarmeValue[]>([]);
 
-  const deleteAlarme = (deveui, triggerType, trigger) => {
-    const updatedAlarmes = alarmesCurrentValues.filter(
+  const deleteAlarme = (deveui, triggerType, trigger, triggerAt) => {
+    const updatedAlarmes = alarmes.filter(
       (alarme) =>
         alarme.deveui !== deveui ||
         alarme.triggerType !== triggerType ||
-        alarme.trigger !== trigger
+        alarme.trigger !== trigger ||
+        alarme.triggerAt !== triggerAt
     );
-
+  
+    const updatedAlarmesCurrentValues = alarmesCurrentValues.filter(
+      (alarme) =>
+        alarme.deveui !== deveui ||
+        alarme.triggerType !== triggerType ||
+        alarme.trigger !== trigger ||
+        alarme.triggerAt !== triggerAt
+    );
+  
     setAlarmes(updatedAlarmes);
+    setAlarmesCurrentValues(updatedAlarmesCurrentValues);
   };
 
 
@@ -80,42 +90,49 @@ const Alarmes = () => {
   useEffect(() => {
     const getAlarmes = async () => {
       const userData = await getData("User", "alarms");
-
-      const setAlarmesData = (userData as unknown as { alarms: any[] }).alarms;
-      setAlarmes(setAlarmesData);
+      if (userData) {
+        const setAlarmesData = (userData as unknown as { alarms: any[] }).alarms;
+        setAlarmes(setAlarmesData);
+      } else {
+        console.error("Failed to fetch alarms or no alarms found");
+      }
     };
 
     getAlarmes();
   }, []);
 
   useEffect(() => {
-    const updateDatabaseAlarmes = async () => {
-      // const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/email`);
-      const response = await fetch(`${SMARTCAMPUSMAUA_SERVER}/api/auth/email`);
-      const dataEmail = await response.json();
+    const timeout = setTimeout(() => {
+      const updateDatabaseAlarmes = async () => {
+        // const response = await fetch(`${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}/api/auth/email`);
+        const response = await fetch(`${SMARTCAMPUSMAUA_SERVER}/api/auth/email`);
+        const dataEmail = await response.json();
 
-      const queries = alarmes.map((alarme) => ({
-        type: alarme.type,
-        local: alarme.local,
-        deveui: alarme.deveui,
-        trigger: alarme.trigger,
-        triggerAt: alarme.triggerAt,
-        triggerType: alarme.triggerType,
-      }));
+        const queries = alarmes.map((alarme) => ({
+          type: alarme.type,
+          local: alarme.local,
+          deveui: alarme.deveui,
+          trigger: alarme.trigger,
+          triggerAt: alarme.triggerAt,
+          triggerType: alarme.triggerType,
+          alreadyPlayed: alarme.alreadyPlayed
+        }));
 
+        const { error } = await supabase
+          .from('User')
+          .update({ alarms: queries })
+          .eq('email', dataEmail.displayName);
 
-      const { error } = await supabase
-        .from('User')
-        .update({ alarms: queries })
-        .eq('email', dataEmail.displayName);
-
-      if (error) {
-        console.error('Error updating alarm on database', error);
-      }
-    };
+        if (error) {
+          console.error('Error updating alarm on database', error);
+        }
+      };
 
     updateDatabaseAlarmes();
-  }, [alarmesCurrentValues]);
+  }, 500); // Debounce para evitar múltiplas chamadas rápidas
+
+  return () => clearTimeout(timeout);
+}, [alarmesCurrentValues]);
 
   useEffect(() => {
     const updateAlarmValues = () => {
@@ -135,7 +152,7 @@ const Alarmes = () => {
                   alarme.triggerType == "batteryVoltage" ? sensor.batteryVoltage.toString() :
                     alarme.triggerType == "humidity" ? sensor.humidity.toString() :
                       alarme.triggerType == "luminosity" ? sensor.luminosity.toString() :
-                        alarme.triggerType == "temperature" ? sensor.temperature.toString() : sensor.movement.toString()
+                        alarme.triggerType == "temperature" ? sensor.temperature.toString() : sensor.movement.toString(),
               );
               newAlarmes.push(newAlarme);
             }
@@ -158,9 +175,11 @@ const Alarmes = () => {
         <Head>
           <title>Alarmes | EcoVision GMS</title>
         </Head>
-        <div className="sticky top-0 z-40 w-full p-8"></div>
+        
+        <div className="flex-col space-around justify-center items-center p-8">
 
-        <div className="3xl:grid-cols-6 grid grid-cols-3 justify-items-center gap-y-10 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="grid w-full gap-10 mx-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+
           {alarmesCurrentValues.map((alarme, index) => {
             const isTriggered = alarme.triggerAt == "higher" ? alarme.currentValue > alarme.trigger : alarme.currentValue < alarme.trigger;
 
@@ -171,14 +190,14 @@ const Alarmes = () => {
                 style={{ boxShadow: '8px 8px 25px rgba(0,0,0,.2)' }}
               >
                 <button
-                  onClick={() => { deleteAlarme(alarme.deveui, alarme.triggerType, alarme.trigger); }}
+                  onClick={() => { deleteAlarme(alarme.deveui, alarme.triggerType, alarme.trigger, alarme.triggerAt); }}
                   className={`${isTriggered ? "text-white" : "text-black"} text-4xl ml-2`}
                 >
                   &times;
                 </button>
-                <div className="relative">
+                <div className="">
                   <svg
-                    className="relative z-10 mx-auto mt-2 fill-current shadow-yellow-300 drop-shadow-2xl"
+                    className="z-10 mx-auto mt-2 fill-current shadow-yellow-300 drop-shadow-2xl"
                     xmlns="http://www.w3.org/2000/svg"
                     width="90"
                     height="90"
@@ -205,7 +224,7 @@ const Alarmes = () => {
                       {alarme.triggerType}
                     </p>
                     <p className={`mr-2 font-medium ${isTriggered ? "text-red-100" : "text-black"}`}>
-                      Tocar: {alarme.triggerAt ? "Abaixo de " : "Acima de "}{alarme.trigger}{
+                      Tocar: {alarme.triggerAt == 'higher' ? "Acima de " : "Abaixo de "}{alarme.trigger}{
                         alarme.triggerType === "boardVoltage" ? "V" :
                           alarme.triggerType === "batteryVoltage" ? "V" :
                             alarme.triggerType === "humidity" ? "%" :
@@ -227,6 +246,7 @@ const Alarmes = () => {
               </div>
             );
           })}
+        </div>
         </div>
       </div>
     </DashboardLayout>
