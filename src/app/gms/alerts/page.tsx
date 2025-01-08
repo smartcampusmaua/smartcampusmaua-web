@@ -12,6 +12,14 @@ const Alarmes = () => {
 
   const [alarmes, setAlarmes] = useState<Alarme[]>([]);
   const [sensors, setSensors] = useState<Luz[]>([]);
+  const [alarmEditPopupOpen, setAlarmEditPopupOpen] = useState(false);
+  var [selectedAlarme, setSelectedAlarme] = useState<AlarmeValue>();
+  const [triggerType, setTriggerType] = useState('boardVoltage');
+  const [trigger, setTrigger] = useState<string>('0');
+  const [triggerAt, setTriggerAt] = useState<string>('higher');
+  var [newAlarm, setNewAlarm] = useState<Alarme>();
+
+
 
   class AlarmeValue {
     deveui: string;
@@ -169,12 +177,157 @@ const Alarmes = () => {
     console.log(alarmesCurrentValues)
   }, [alarmesCurrentValues])
 
+  const openEditPopup = (alarme: AlarmeValue) => {
+    const newSelectedAlarme = new AlarmeValue(
+      alarme.deveui,
+      alarme.trigger,
+      alarme.triggerAt,
+      alarme.triggerType,
+      alarme.local,
+      alarme.type,
+      alarme.currentValue,
+    );
+    setSelectedAlarme(newSelectedAlarme);
+    setTrigger(newSelectedAlarme.trigger);
+    setTriggerAt(newSelectedAlarme.triggerAt);
+    setTriggerType(newSelectedAlarme.triggerType);
+    setAlarmEditPopupOpen(true);
+  };
+
+  const handleEditAlarm = async (editedAlarme: AlarmeValue) => {
+    //  estado local
+    const updatedAlarmes = alarmes.map((alarme) =>
+      alarme.deveui === editedAlarme.deveui ? editedAlarme : alarme
+    );
+    setAlarmes(updatedAlarmes);
+  
+    // bdd
+    const response = await fetch(`${SMARTCAMPUSMAUA_SERVER}/api/auth/email`);
+    const dataEmail = await response.json();
+
+    if (response) {
+      const { error } = await supabase
+        .from('User')
+        .update({
+          alarms: updatedAlarmes.map((alarme) => ({
+            type: alarme.type,
+            local: alarme.local,
+            deveui: alarme.deveui,
+            trigger: alarme.trigger,
+            triggerAt: alarme.triggerAt,
+            triggerType: alarme.triggerType,
+            alreadyPlayed: alarme.alreadyPlayed,
+          }))
+        })
+        .eq('email', dataEmail.displayName); 
+  
+      if (error) {
+        console.error('Erro ao atualizar alarme no banco de dados', error);
+      }
+    } else {
+      console.error("Não foi possível encontrar os dados do usuário");
+    }
+  };
+
+
   return (
     <DashboardLayout>
       <div>
         <Head>
           <title>Alarmes | EcoVision GMS</title>
         </Head>
+
+        {/* Edição de alarme */}
+        {alarmEditPopupOpen && selectedAlarme ? (
+          <div className="flex flex-col w-full">
+            <div className="m-4">
+              <button
+                onClick={() => setAlarmEditPopupOpen(!alarmEditPopupOpen)}
+                className="m-2 bg-red-500 hover:bg-red-700 text-white text-2xl font-bold py-3 px-6 rounded">
+                Voltar
+              </button>
+            </div>
+            <div className="container max-w-screen-lg mx-auto grid grid-cols-1 sm:grid-cols-2 justify-items-center">
+              <div className="m-2 flex justify-center h-fit max-w-[24rem] border border-gray-400 bg-gray-50 rounded">
+                <div className="m-2">
+                  <p className="font-bold text-3xl text-center">Alarme Selecionado</p>
+                  <h2 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300 text-center">
+                    {selectedAlarme.type || "Nome não disponível"}
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                    Local: {selectedAlarme.local}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                    DEVEUI: {selectedAlarme.deveui}
+                  </p>
+                  <ul className="text-sm space-y-2">
+                    {selectedAlarme.triggerType && <li><strong>Board Voltage: </strong> {selectedAlarme.currentValue} V</li>}
+                    <ul className="text-sm space-y-2">
+                    {selectedAlarme.triggerAt && <li><strong>tocar: </strong> {selectedAlarme.triggerAt == 'higher' ? "Acima de " : "Abaixo de "}{selectedAlarme.trigger}{
+                        selectedAlarme.triggerType === "boardVoltage" ? "V" :
+                          selectedAlarme.triggerType === "batteryVoltage" ? "V" :
+                            selectedAlarme.triggerType === "humidity" ? "%" :
+                              selectedAlarme.triggerType === "luminosity" ? " lux" :
+                                selectedAlarme.triggerType === "temperature" ? "°C" : ""}</li>
+                    }
+                    </ul>
+                  </ul>
+                </div>
+              </div>
+              <div className="m-2 flex flex-col justify-center h-fit max-w-[24rem] border border-gray-400 bg-gray-50 rounded">
+                <div className="m-2">
+                  <p className="font-bold text-3xl text-center">Editar Alarme</p>
+                  <p>
+                    Escolha o campo para o alarme
+                  </p>
+                  <select className="border border-black rounded p-1 text-lg" value={selectedAlarme.triggerType} onChange={(event) => setTriggerType(event.target.value)}>
+                    <option value={"boardVoltage"}> boardVoltage</option>
+                    <option value={"batteryVoltage"}> batteryVoltage</option>
+                    <option value={"humidity"}> humidity</option>
+                    <option value={"luminosity"}> luminosity</option>
+                    <option value={"temperature"}> temperature</option>
+                    <option value={"movement"}> movement</option>
+                    <option value={"pressure"}> pressure</option>
+                    <option value={"co2"}> co2</option>
+                  </select>
+                  <p className="">Quando tocar</p>
+                  <div className="flex">
+                    <select className="border border-black rounded p-1 text-lg" value={triggerAt} onChange={(event) => setTriggerAt(event.target.value)}>
+                      <option value={"higher"}> Acima de</option>
+                      <option value={"lower"}> Abaixo de</option>
+                    </select>
+                    <input type="text" id="alarmTrigger" className="mx-1 w-32 border border-black rounded p-1 text-lg" placeholder="Valor" required value={trigger} onChange={(event) => setTrigger(event.target.value)} />
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    const updatedAlarme = new AlarmeValue(
+                      selectedAlarme.deveui,
+                      trigger,
+                      triggerAt,
+                      triggerType,
+                      selectedAlarme.local,
+                      selectedAlarme.type,
+                      selectedAlarme.currentValue
+                    );
+                    handleEditAlarm(updatedAlarme);
+                    setAlarmEditPopupOpen(false);  // Fechar o popup após salvar
+                  }}
+                  className="m-2 bg-blue-500 text-white px-3 py-1 rounded h-8 text-lg font-bold hover:bg-blue-700"
+                >Editar alarme</button>
+              </div>
+          </div>
+          {/* <div className="mt-4 text-5xl text-center font-bold">
+            {!alarmError && newAlarm ? (
+              <p className="text-green-500">Alarme inserido com sucesso</p>
+            ) : alarmError && newAlarm ?(
+              <p className="text-red-500">Por favor, preencha todos os campos</p>
+            ) : <p></p>
+          }
+          </div> */}
+        </div>
+      ) : (
+
         
         <div className="flex-col space-around justify-center items-center p-8">
 
@@ -189,12 +342,20 @@ const Alarmes = () => {
                 className={`animate-fade-in relative h-64 w-56 overflow-hidden rounded-xl ${isTriggered ? "bg-red-500 text-red-100" : "bg-white dark:bg-neutral-900 dark:text-neutral-700"} shadow-md`}
                 style={{ boxShadow: '8px 8px 25px rgba(0,0,0,.2)' }}
               >
-                <button
-                  onClick={() => { deleteAlarme(alarme.deveui, alarme.triggerType, alarme.trigger, alarme.triggerAt); }}
-                  className={`${isTriggered ? "text-white" : "text-black"} text-4xl ml-2`}
-                >
-                  &times;
-                </button>
+                <div className="flex justify-between">
+                  <button
+                    onClick={() => { deleteAlarme(alarme.deveui, alarme.triggerType, alarme.trigger, alarme.triggerAt); }}
+                    className={`${isTriggered ? "text-white" : "text-black"} text-4xl ml-2`}
+                  >
+                    &times;
+                  </button>
+                  <button
+                    onClick={() => openEditPopup(alarme)}
+                    className={`${isTriggered ? "text-white" : "text-black"} font-bold p-2`}
+                  >
+                    Editar
+                  </button>
+                </div>
                 <div className="">
                   <svg
                     className="z-10 mx-auto mt-2 fill-current shadow-yellow-300 drop-shadow-2xl"
@@ -247,7 +408,7 @@ const Alarmes = () => {
             );
           })}
         </div>
-        </div>
+        </div>)}
       </div>
     </DashboardLayout>
   );
