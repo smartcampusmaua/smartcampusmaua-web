@@ -18,82 +18,258 @@ import { formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 const Sensores = () => {
-  const [sensores, setSensors] = useState<GenericSensor[]>([]);
-  const [filteredSensores, setFilteredSensores] = useState<GenericSensor[]>([]);
+  const [sensors, setSensores] = useState<GenericSensor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [filteredSensores, setFilteredSensores] = useState<GenericSensor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string>("local");
   const SMARTCAMPUSMAUA_SERVER = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}`;
 
+  const sanitize = (value: any) => (value === "" || value === null ? "Indisponível" : value);
 
   useEffect(() => {
     const fetchSensors = async () => {
-      try {
-        const { data: sensors, error } = await supabase.from('Sensors').select("Nome, DEVEUI, Bloco, Sala");
-        if (error) {
-          console.error('Error fetching sensors data: ', error);
-          return;
-        }
-        const deveuiToLocalMap: Record<string, string> = {};
-        sensors?.forEach((sensor) => {
-          deveuiToLocalMap[sensor.DEVEUI] = `${sensor.Bloco} - ${sensor.Sala}`;
+      const { data: sensorsInfo, error } = await supabase
+        .from('SensorsNew')
+        .select("Nome, DEVEUI, Local, Tipo");
+
+      if (error) {
+        console.error('Error fetching sensors data: ', error);
+        return;
+      }
+
+      const sensorsData = await fetchAllSensors();
+
+      setSensores(prevSensores => {
+        const updatedSensores = [...prevSensores];
+
+        sensorsData.forEach(sensorData => {
+          const isDuplicate = updatedSensores.some(
+            sensor => sanitize(sensor.tags[0]) === sanitize(sensorData.tags.deviceId)
+          );
+          var sensorAlreadyExists = false;
+
+          if (!isDuplicate) {
+            let newSensor;
+            if (sensorData.name === "SmartLight" && !sensorAlreadyExists) {
+              sensorsInfo.forEach(sensorInfo => {
+                if (sensorInfo.DEVEUI == sensorData.tags.deviceId) {
+                  newSensor = new GenericSensor(
+                    sanitize(sensorInfo.Nome),
+                    sensorData.name,
+                    [
+                      sanitize((Number(sensorData.fields.batteryVoltage) / 1000).toFixed(1)) + " V",
+                      sanitize(sensorData.fields.boardVoltage) + " V",
+                      sanitize(sensorData.fields.humidity) + " %",
+                      sanitize((Math.pow(Number(sensorData.fields.luminosity), -3.746) * 140000000000000).toFixed(1)) + " lux",
+                      sanitize(sensorData.fields.temperature) + " °C",
+                      sanitize(sensorData.fields.movement)
+                    ],
+                    [sanitize(sensorData.tags.deviceId)],
+                    sanitize(sensorInfo.Local),
+                    new Date(Number(sensorData.timestamp) / 1e6)
+                  );
+                  sensorAlreadyExists = true;
+                }
+              });
+              if (!sensorAlreadyExists) {
+                newSensor = new GenericSensor(
+                  "Indisponível",
+                  sensorData.name,
+                  [
+                    sanitize((Number(sensorData.fields.batteryVoltage) / 1000).toFixed(1)) + " V",
+                    sanitize(sensorData.fields.boardVoltage) + " V",
+                    sanitize(sensorData.fields.humidity) + " %",
+                    sanitize((Math.pow(Number(sensorData.fields.luminosity), -3.746) * 140000000000000).toFixed(1)) + " lux",
+                    sanitize(sensorData.fields.temperature) + " °C",
+                    sanitize(sensorData.fields.movement)
+                  ],
+                  [sanitize(sensorData.tags.deviceId)],
+                  "Indisponível",
+                  new Date(Number(sensorData.timestamp) / 1e6)
+                );
+              }
+            } else if (sensorData.name === "WaterTankLevel") {
+              sensorsInfo.forEach(sensorInfo => {
+                if (sensorInfo.DEVEUI == sensorData.tags.deviceId) {
+                  newSensor = new GenericSensor(
+                    sanitize(sensorInfo.Nome),
+                    sensorData.name,
+                    [
+                      sanitize((sensorData.fields.boardVoltage).toFixed(1)) + " V",
+                      sanitize((Number(sensorData.fields.distance) / 1000).toFixed(1)) + " metros"
+                    ],
+                    [sanitize(sensorData.tags.deviceId)],
+                    sanitize(sensorInfo.Local),
+                    new Date(Number(sensorData.timestamp) / 1e6)
+                  );
+                  sensorAlreadyExists = true;
+                }
+              });
+              if (!sensorAlreadyExists) {
+                newSensor = new GenericSensor(
+                  "Indisponível",
+                  sensorData.name,
+                  [
+                    sanitize((sensorData.fields.boardVoltage).toFixed(1)) + " V",
+                    sanitize((Number(sensorData.fields.distance) / 1000).toFixed(1)) + " metros"
+                  ],
+                  [sanitize(sensorData.tags.deviceId)],
+                  "Indisponível",
+                  new Date(Number(sensorData.timestamp) / 1e6)
+                );
+              }
+            } else if (sensorData.name === "Hydrometer") {
+              sensorsInfo.forEach(sensorInfo => {
+                if (sensorInfo.DEVEUI == sensorData.tags.deviceId) {
+                  newSensor = new GenericSensor(
+                    sanitize(sensorInfo.Nome),
+                    sensorData.name,
+                    [
+                      sanitize(sensorData.fields.boardVoltage).toFixed(1) + " V",
+                      sanitize(sensorData.fields.counter)
+                    ],
+                    [sanitize(sensorData.tags.deviceId)],
+                    sanitize(sensorInfo.Local),
+                    new Date(Number(sensorData.timestamp) / 1e6)
+                  );
+                  sensorAlreadyExists = true;
+                }
+              });
+              if (!sensorAlreadyExists) {
+                newSensor = new GenericSensor(
+                  "Indisponível",
+                  sensorData.name,
+                  [
+                    sanitize(sensorData.fields.boardVoltage).toFixed(1) + " V",
+                    sanitize(sensorData.fields.counter)
+                  ],
+                  [sanitize(sensorData.tags.deviceId)],
+                  "Indisponível",
+                  new Date(Number(sensorData.timestamp) / 1e6)
+                );
+              }
+            } else if (sensorData.name === "EnergyMeter") {
+              sensorsInfo.forEach(sensorInfo => {
+                if (sensorInfo.DEVEUI == sensorData.tags.deviceId) {
+                  newSensor = new GenericSensor(
+                    sanitize(sensorInfo.Nome),
+                    sensorData.name,
+                    [
+                      sanitize(sensorData.fields.boardVoltage).toFixed(1) + " V",
+                      sanitize(sensorData.fields.forwardEnergy).toFixed(1) + " kWh",
+                      sanitize(sensorData.fields.reverseEnergy).toFixed(1) + " kWh"
+                    ],
+                    [sanitize(sensorData.tags.deviceId)],
+                    sanitize(sensorInfo.Local),
+                    new Date(Number(sensorData.timestamp) / 1e6)
+                  );
+                  sensorAlreadyExists = true;
+                }
+              });
+              if (!sensorAlreadyExists) {
+                newSensor = new GenericSensor(
+                  "Indisponível",
+                  sensorData.name,
+                  [
+                    sanitize(sensorData.fields.boardVoltage).toFixed(1) + " V",
+                    sanitize(sensorData.fields.forwardEnergy).toFixed(1) + " kWh",
+                    sanitize(sensorData.fields.reverseEnergy).toFixed(1) + " kWh"
+                  ],
+                  [sanitize(sensorData.tags.deviceId)],
+                  "Indisponível",
+                  new Date(Number(sensorData.timestamp) / 1e6)
+                );
+              }
+            } else if (sensorData.name === "WeatherStation") {
+              sensorsInfo.forEach(sensorInfo => {
+                if (sensorInfo.DEVEUI == sensorData.tags.deviceId) {
+                  newSensor = new GenericSensor(
+                    sanitize(sensorInfo.Nome),
+                    sensorData.name,
+                    [
+                      sanitize(sensorData.fields.emwAtmPres),
+                      sanitize(sensorData.fields.emwAvgWindSpeed),
+                      sanitize(sensorData.fields.emwGustWindSpeed),
+                      sanitize(sensorData.fields.emwHumidity) + " %",
+                      sanitize(sensorData.fields.emwLuminosity),
+                      sanitize(sensorData.fields.emwRainLevel),
+                      sanitize(sensorData.fields.emwSolarRadiation),
+                      sanitize(sensorData.fields.emwTemperature) + " °C",
+                      sanitize(sensorData.fields.emwUv)
+                    ],
+                    [sanitize(sensorData.tags.deviceId)],
+                    sanitize(sensorInfo.Local),
+                    new Date(Number(sensorData.timestamp) / 1e6)
+                  );
+                  sensorAlreadyExists = true;
+                }
+              });
+              if (!sensorAlreadyExists) {
+                newSensor = new GenericSensor(
+                  "Indisponível",
+                  sensorData.name,
+                  [
+                    sanitize(sensorData.fields.emwAtmPres),
+                    sanitize(sensorData.fields.emwAvgWindSpeed),
+                    sanitize(sensorData.fields.emwGustWindSpeed),
+                    sanitize(sensorData.fields.emwHumidity) + " %",
+                    sanitize(sensorData.fields.emwLuminosity),
+                    sanitize(sensorData.fields.emwRainLevel),
+                    sanitize(sensorData.fields.emwSolarRadiation),
+                    sanitize(sensorData.fields.emwTemperature) + " °C",
+                    sanitize(sensorData.fields.emwUv)
+                  ],
+                  [sanitize(sensorData.tags.deviceId)],
+                  "Indisponível",
+                  new Date(Number(sensorData.timestamp) / 1e6)
+                );
+              }
+            }
+
+            if (newSensor) {
+              updatedSensores.push(newSensor);
+            }
+          }
         });
 
-        const allSensorsData = await fetchAllSensors();
-        const uniqueDeviceIds = new Set();
-        const newSensors = allSensorsData.filter((entry: any) => {
-          const { deviceId } = entry.tags;
-          if (uniqueDeviceIds.has(deviceId)) {
-            return false;
+        sensorsInfo.forEach(sensorInfo => {
+          const isMissingInSensorsData = !sensorsData.some(sensorData =>
+            sanitize(sensorData.tags.deviceId) === sanitize(sensorInfo.DEVEUI)
+          );
+
+          if (isMissingInSensorsData) {
+            updatedSensores.push(
+              new GenericSensor(
+                sensorInfo.Nome,
+                sensorInfo.Tipo,
+                ["Sensor Offline"],
+                [sensorInfo.DEVEUI],
+                sensorInfo.Local,
+              )
+            )
           }
-          uniqueDeviceIds.add(deviceId);
-          return true;
-        })
-          .map((entry: any) => {
-            const { fields, tags, name, timestamp} = entry;
-            const { boardVoltage, batteryVoltage, humidity, luminosity, temperature, movement, pressure, co2 } = fields;
-            const { deviceId, type } = tags;
+        });
 
-            const local = deveuiToLocalMap[deviceId] || "ID não encontrado";
+        return updatedSensores;
+      });
 
-            return new GenericSensor(
-              name,
-              type,
-              deviceId, // deveui
-              boardVoltage,
-              batteryVoltage ? batteryVoltage / 1000 : null,
-              humidity,
-              luminosity,
-              temperature,
-              movement,
-              pressure,
-              co2,
-              local,
-              new Date(Number(timestamp) / 1000000)
-            );
-          });
-        const sortedSensors: GenericSensor[] = newSensors.sort((a: { local }, b: { local }) => // RC-EDIT
-          a.local.localeCompare(b.local)
-        );
-        setSensors(sortedSensors);
-      } catch (err) {
-        console.error('Unexpected error occurred:', err);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(false);
     };
+
     fetchSensors();
   }, []);
 
+
   // Filtra os sensores com base no filtro e na busca
   useEffect(() => {
-    const filtered = sensores.filter((sensor) => {
+    const filtered = sensors.filter((sensor) => {
       // Corrigir a chamada do método toString()
       const value = sensor[selectedFilter as keyof GenericSensor]?.toString() || "";
       return value.toLowerCase().includes(searchQuery.toLowerCase());
     });
     setFilteredSensores(filtered);
-  }, [searchQuery, selectedFilter, sensores]);
+  }, [searchQuery, selectedFilter, sensors]);
 
   const [alarmPopupOpen, setAlarmPopupOpen] = useState(false);
   const [alarmSensor, setAlarmSensor] = useState<GenericSensor>();
@@ -105,7 +281,7 @@ const Sensores = () => {
 
   const handleNewAlarm = () => {
     const newAlarmData = new Alarme(
-      alarmSensor.deveui,
+      alarmSensor.tags[0],
       trigger,
       triggerAt,
       triggerType,
@@ -120,7 +296,7 @@ const Sensores = () => {
   useEffect(() => {
     const updateDatabaseAlarmes = async () => {
       try {
-        if(newAlarm == null) return;
+        if (newAlarm == null) return;
 
         const response = await fetch(`${SMARTCAMPUSMAUA_SERVER}/api/auth/email`);
         const dataEmail = await response.json();
@@ -170,18 +346,10 @@ const Sensores = () => {
                   Local: {alarmSensor.local}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
-                  DEVEUI: {alarmSensor.deveui}
+                  DEVEUI: {alarmSensor.tags[0]}
                 </p>
                 <ul className="text-sm space-y-2">
-                  {alarmSensor.boardVoltage && <li><strong>Board Voltage:</strong> {alarmSensor.boardVoltage} V</li>}
-                  {alarmSensor.batteryVoltage && <li><strong>Battery Voltage:</strong> {alarmSensor.batteryVoltage} V</li>}
-                  {alarmSensor.humidity && <li><strong>Humidity:</strong> {alarmSensor.humidity}%</li>}
-                  {alarmSensor.luminosity && <li><strong>Luminosity:</strong> {alarmSensor.luminosity} lux</li>}
-                  {alarmSensor.temperature && <li><strong>Temperature:</strong> {alarmSensor.temperature}°C</li>}
-                  {alarmSensor.movement && <li><strong>Movement:</strong> {alarmSensor.movement}</li>}
-                  {alarmSensor.pressure && <li><strong>Pressure:</strong> {alarmSensor.pressure} Pa</li>}
-                  {alarmSensor.co2 && <li><strong>CO2:</strong> {alarmSensor.co2} ppm</li>}
-                  {alarmSensor.timestamp && <li><strong>Atualizado há:</strong> {formatDistanceToNow(new Date(alarmSensor.timestamp), {locale: pt})}</li>}
+                  {alarmSensor.timestamp && <li><strong>Atualizado há:</strong> {formatDistanceToNow(new Date(alarmSensor.timestamp), { locale: pt })}</li>}
                 </ul>
               </div>
             </div>
@@ -271,63 +439,118 @@ const Sensores = () => {
 
               {/* Lista de Sensores */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {filteredSensores.map((sensor, index) => (
+                {sensors.map((sensor, index) => (
                   <div
                     key={index}
-                    className="bg-white dark:bg-neutral-800 p-5 rounded-lg shadow-lg hover:shadow-2xl transition-shadow"
+                    className="bg-white dark:bg-neutral-800 p-5 rounded-lg shadow-lg hover:shadow-2xl transition-shadow h-fit"
                   >
                     <h2 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300 text-center">
                       {sensor.name || "Nome não disponível"}
                     </h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                      {sensor.type}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
                       Local: {sensor.local}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">DEVEUI: {sensor.deveui}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">DeviceId: {sensor.tags[0]}</p>
 
                     <ul className="text-sm space-y-2">
-                      {sensor.boardVoltage && (
-                        <li>
-                          <strong>Board Voltage:</strong> {sensor.boardVoltage} V
-                        </li>
-                      )}
-                      {sensor.batteryVoltage && (
-                        <li>
-                          <strong>Battery Voltage:</strong> {sensor.batteryVoltage} V
-                        </li>
-                      )}
-                      {sensor.humidity && (
-                        <li>
-                          <strong>Humidity:</strong> {sensor.humidity}%
-                        </li>
-                      )}
-                      {sensor.luminosity && (
-                        <li>
-                          <strong>Luminosity:</strong> {sensor.luminosity} lux
-                        </li>
-                      )}
-                      {sensor.temperature && (
-                        <li>
-                          <strong>Temperature:</strong> {sensor.temperature}°C
-                        </li>
-                      )}
-                      {sensor.movement && (
-                        <li>
-                          <strong>Movement:</strong> {sensor.movement}
-                        </li>
-                      )}
-                      {sensor.pressure && (
-                        <li>
-                          <strong>Pressure:</strong> {sensor.pressure} Pa
-                        </li>
-                      )}
-                      {sensor.co2 && (
-                        <li>
-                          <strong>CO2:</strong> {sensor.co2} ppm
-                        </li>
-                      )}
+                      {
+                        sensor.type === "SmartLight" ? (
+                          <ul>
+                            <li>
+                              <strong>BatteryVoltage: </strong>{sensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>BoardVoltage: </strong>{sensor.fields[1]}
+                            </li>
+                            <li>
+                              <strong>Humidade: </strong>{sensor.fields[2]}
+                            </li>
+                            <li>
+                              <strong>Luminosidade: </strong>{sensor.fields[3]}
+                            </li>
+                            <li>
+                              <strong>Temperatura: </strong>{sensor.fields[4]}
+                            </li>
+                            <li>
+                              <strong>Movement: </strong>{sensor.fields[5]}
+                            </li>
+                          </ul>
+                        ) : sensor.type === "WaterTankLevel" ? (
+                          <ul>
+                            <li>
+                              <strong>boardVoltage: </strong>{sensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>Distância: </strong>{sensor.fields[1]}
+                            </li>
+                          </ul>
+                        ) : sensor.type === "Hydrometer" ? (
+                          <ul>
+                            <li>
+                              <strong>boardVoltage: </strong>{sensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>Counter: </strong>{sensor.fields[1]}
+                            </li>
+                          </ul>
+                        ) : sensor.type === "EnergyMeter" ? (
+                          <ul>
+                            <li>
+                              <strong>boardVoltage: </strong>{sensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>ForwardEnergy: </strong>{sensor.fields[1]}
+                            </li>
+                            <li>
+                              <strong>ReverseEnergy: </strong>{sensor.fields[2]}
+                            </li>
+                          </ul>
+                        ) : sensor.type === "WeatherStation" ? (
+                          <ul>
+                            <li>
+                              <strong>Pressão Atmosférica: </strong>{sensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>Velocidade do Vento: </strong>{sensor.fields[1]}
+                            </li>
+                            <li>
+                              <strong>Velocidade Rajada de Vento: </strong>{sensor.fields[2]}
+                            </li>
+                            <li>
+                              <strong>Humidade: </strong>{sensor.fields[3]}
+                            </li>
+                            <li>
+                              <strong>Luminosidade: </strong>{sensor.fields[4]}
+                            </li>
+                            <li>
+                              <strong>Nivel de Chuva: </strong>{sensor.fields[5]}
+                            </li>
+                            <li>
+                              <strong>Radiação Solar: </strong>{sensor.fields[6]}
+                            </li>
+                            <li>
+                              <strong>Temperatura: </strong>{sensor.fields[7]}
+                            </li>
+                            <li>
+                              <strong>Índice UV: </strong>{sensor.fields[8]}
+                            </li>
+                          </ul>
+                        ) : sensor.fields[0] === "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>Sensor Offline</strong>
+                            </li>
+                          </ul>
+                        ) : (
+                          <p></p>
+                        )
+                      }
                       {sensor.timestamp && (
                         <li>
-                          <strong>Atualizado há: </strong> {formatDistanceToNow(new Date(sensor.timestamp), {locale: pt})}
+                          <strong>Atualizado há: </strong> {formatDistanceToNow(new Date(sensor.timestamp), { locale: pt })}
                         </li>
                       )}
                     </ul>

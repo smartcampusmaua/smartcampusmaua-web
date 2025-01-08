@@ -65,19 +65,12 @@ class Local {
 
 class GenericSensor {
     constructor(
-        public name: string,
-        public type: string | null,
-        public deveui: string,
-        public boardVoltage: number | null,
-        public batteryVoltage: number | null,
-        public humidity: number | null,
-        public luminosity: number | null,
-        public temperature: number | null,
-        public movement: boolean | null,
-        public pressure: number | null,
-        public co2: number | null,
+        public name: string, // DET-20
+        public type: string | null, // Smartlight
+        public fields: string[],
+        public tags: string[],
         public local: string,
-        public timestamp: Date, 
+        public timestamp?: Date, 
     ) {}
 }
 
