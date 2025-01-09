@@ -13,7 +13,6 @@ import {
   supabase,
   // getData 
 } from '@/database/supabaseClient';
-import { Alarme } from "@/database/dataTypes";
 import { formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
@@ -22,7 +21,6 @@ const Sensores = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [filteredSensores, setFilteredSensores] = useState<GenericSensor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState<string>("local");
   const SMARTCAMPUSMAUA_SERVER = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}`;
 
   const sanitize = (value: any) => (value === "" || value === null ? "Indisponível" : value);
@@ -270,12 +268,12 @@ const Sensores = () => {
   // Filtra os sensores com base no filtro e na busca
   useEffect(() => {
     const filtered = sensors.filter((sensor) => {
-      // Corrigir a chamada do método toString()
-      const value = sensor[selectedFilter as keyof GenericSensor]?.toString() || "";
-      return value.toLowerCase().includes(searchQuery.toLowerCase());
+      return Object.values(sensor).some((value) => 
+        value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      );
     });
     setFilteredSensores(filtered);
-  }, [searchQuery, selectedFilter, sensors]);
+  }, [searchQuery, sensors]);
 
   const [alarmPopupOpen, setAlarmPopupOpen] = useState(false);
   const [alarmSensor, setAlarmSensor] = useState<GenericSensor>();
@@ -456,29 +454,11 @@ const Sensores = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="border rounded p-3 w-full focus:ring-2 focus:ring-blue-500"
                 />
-                <select
-                  value={selectedFilter}
-                  onChange={(e) => setSelectedFilter(e.target.value)}
-                  className="border rounded p-3 w-full md:w-1/4 focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="deveui">Deveui</option>
-                  <option value="local">Local</option>
-                  <option value="name">Nome</option>
-                  <option value="type">Tipo</option>
-                  <option value="boardVoltage">Board Voltage</option>
-                  <option value="batteryVoltage">Battery Voltage</option>
-                  <option value="humidity">Humidity</option>
-                  <option value="luminosity">Luminosity</option>
-                  <option value="temperature">Temperature</option>
-                  <option value="movement">Movement</option>
-                  <option value="pressure">Pressure</option>
-                  <option value="co2">CO2</option>
-                </select>
               </div>
 
               {/* Lista de Sensores */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {sensors.map((sensor, index) => (
+                {filteredSensores.map((sensor, index) => (
                   <div
                     key={index}
                     className="bg-white dark:bg-neutral-800 p-5 rounded-lg shadow-lg hover:shadow-2xl transition-shadow h-fit"
