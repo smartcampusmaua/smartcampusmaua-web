@@ -28,7 +28,7 @@ const Sensores = () => {
   useEffect(() => {
     const fetchSensors = async () => {
       const { data: sensorsInfo, error } = await supabase
-        .from('SensorsNew')
+        .from('Sensors')
         .select("Nome, DEVEUI, Local, Tipo");
 
       if (error) {
