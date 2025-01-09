@@ -13,7 +13,6 @@ import {
   supabase,
   // getData 
 } from '@/database/supabaseClient';
-import { Alarme } from "@/database/dataTypes";
 import { formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
@@ -22,7 +21,6 @@ const Sensores = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [filteredSensores, setFilteredSensores] = useState<GenericSensor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState<string>("local");
   const SMARTCAMPUSMAUA_SERVER = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}`;
 
   const sanitize = (value: any) => (value === "" || value === null ? "Indisponível" : value);
@@ -30,7 +28,7 @@ const Sensores = () => {
   useEffect(() => {
     const fetchSensors = async () => {
       const { data: sensorsInfo, error } = await supabase
-        .from('SensorsNew')
+        .from('Sensors')
         .select("Nome, DEVEUI, Local, Tipo");
 
       if (error) {
@@ -239,15 +237,21 @@ const Sensores = () => {
           );
 
           if (isMissingInSensorsData) {
-            updatedSensores.push(
-              new GenericSensor(
-                sensorInfo.Nome,
-                sensorInfo.Tipo,
-                ["Sensor Offline"],
-                [sensorInfo.DEVEUI],
-                sensorInfo.Local,
-              )
-            )
+            const alreadyExists = updatedSensores.some(sensor =>
+              sanitize(sensor.tags[0]) === sanitize(sensorInfo.DEVEUI)
+            );
+
+            if (!alreadyExists) {
+              updatedSensores.push(
+                new GenericSensor(
+                  sanitize(sensorInfo.Nome),
+                  sanitize(sensorInfo.Tipo),
+                  ["Sensor Offline"],
+                  [sanitize(sensorInfo.DEVEUI)],
+                  sanitize(sensorInfo.Local)
+                )
+              );
+            }
           }
         });
 
@@ -264,65 +268,56 @@ const Sensores = () => {
   // Filtra os sensores com base no filtro e na busca
   useEffect(() => {
     const filtered = sensors.filter((sensor) => {
-      // Corrigir a chamada do método toString()
-      const value = sensor[selectedFilter as keyof GenericSensor]?.toString() || "";
-      return value.toLowerCase().includes(searchQuery.toLowerCase());
+      return Object.values(sensor).some((value) => 
+        value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      );
     });
     setFilteredSensores(filtered);
-  }, [searchQuery, selectedFilter, sensors]);
+  }, [searchQuery, sensors]);
 
   const [alarmPopupOpen, setAlarmPopupOpen] = useState(false);
   const [alarmSensor, setAlarmSensor] = useState<GenericSensor>();
-  const [triggerType, setTriggerType] = useState('boardVoltage');
+  const [triggerType, setTriggerType] = useState('');
   const [trigger, setTrigger] = useState<string>('0');
   const [triggerAt, setTriggerAt] = useState<string>('higher');
-  var [newAlarm, setNewAlarm] = useState<Alarme>();
-  // const [alarmError, setAlarmError] = useState<boolean>(); // Removendo até fazer um popup bonito ao invés do texto verde
+  const [alarmInsertAttempt, setAlarmInsertAttempt] = useState<boolean>(false);
 
-  const handleNewAlarm = () => {
-    const newAlarmData = new Alarme(
-      alarmSensor.tags[0],
-      trigger,
-      triggerAt,
-      triggerType,
-      alarmSensor.local,
-      alarmSensor.name,
-      false
-    )
+  const handleNewAlarm = async () => {
+    setAlarmInsertAttempt(true);
+    const response = await fetch(`${SMARTCAMPUSMAUA_SERVER}/api/auth/email`);
+    const userEmailResponse = await response.json();
+    const userEmail = userEmailResponse.displayName;
 
-    setNewAlarm(newAlarmData);
-  }
+    const { data: userData, error } = await supabase
+      .from('User')
+      .select('id')
+      .eq('email', userEmail);
 
-  useEffect(() => {
-    const updateDatabaseAlarmes = async () => {
-      try {
-        if (newAlarm == null) return;
-
-        const response = await fetch(`${SMARTCAMPUSMAUA_SERVER}/api/auth/email`);
-        const dataEmail = await response.json();
-
-        const newAlarmEntry = newAlarm;
-
-        const { error } = await supabase.rpc('append_to_alarms', {
-          email_param: dataEmail.displayName,
-          new_alarm: newAlarmEntry,
-        });
-
-        if (error) {
-          console.error('Error appending alarm to database', error);
-          // setAlarmError(true);
-        }
-      } catch (error) {
-        console.error('Unexpected error', error);
-        // setAlarmError(true);
+    if (error) {
+      console.error('Error fetching user data: ', error);
+    }
+    else {
+      if (triggerType !== "") {
+        const { data, error } = await supabase
+          .from('Alarms')
+          .insert([
+            {
+              userId: userData[0].id,
+              type: alarmSensor.type,
+              local: alarmSensor.local,
+              deveui: alarmSensor.tags[0],
+              trigger: trigger,
+              triggerAt: triggerAt,
+              triggerType: triggerType,
+              alreadyPlayed: false
+            },
+          ]);
+          if (!error) setAlarmInsertAttempt(false);
       }
-      // setAlarmError(false);
-    };
+    } 
 
-    updateDatabaseAlarmes();
-    setAlarmPopupOpen(false);
-  }, [newAlarm]);
-
+    if (alarmInsertAttempt === true) setAlarmPopupOpen(false);
+  }
 
   return (
     <DashboardLayout>
@@ -343,6 +338,9 @@ const Sensores = () => {
                   {alarmSensor.name || "Nome não disponível"}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                  {alarmSensor.type}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
                   Local: {alarmSensor.local}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
@@ -359,16 +357,55 @@ const Sensores = () => {
                 <p>
                   Escolha o campo para o alarme
                 </p>
-                <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
-                  <option value={"boardVoltage"}> boardVoltage</option>
-                  <option value={"batteryVoltage"}> batteryVoltage</option>
-                  <option value={"humidity"}> humidity</option>
-                  <option value={"luminosity"}> luminosity</option>
-                  <option value={"temperature"}> temperature</option>
-                  <option value={"movement"}> movement</option>
-                  <option value={"pressure"}> pressure</option>
-                  <option value={"co2"}> co2</option>
-                </select>
+                {
+                  alarmSensor.type == "SmartLight" ? (
+                    <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
+                      <option value={""}></option>
+                      <option value={"boardVoltage"}> boardVoltage</option>
+                      <option value={"batteryVoltage"}> batteryVoltage</option>
+                      <option value={"humidity"}> humidity</option>
+                      <option value={"luminosity"}> luminosity</option>
+                      <option value={"temperature"}> temperature</option>
+                      <option value={"movement"}> movement</option>
+                      <option value={"pressure"}> pressure</option>
+                      <option value={"co2"}> co2</option>
+                    </select>
+                  ) : alarmSensor.type === "WaterTankLevel" ? (
+                    <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
+                      <option value={""}></option>
+                      <option value={"boardVoltage"}> boardVoltage</option>
+                      <option value={"distance"}> Distância</option>
+                    </select>
+                  ) : alarmSensor.type === "Hydrometer" ? (
+                    <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
+                      <option value={""}></option>
+                      <option value={"boardVoltage"}> boardVoltage</option>
+                      <option value={"counter"}> Counter</option>
+                    </select>
+                  ) : alarmSensor.type === "EnergyMeter" ? (
+                    <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
+                      <option value={""}></option>
+                      <option value={"boardVoltage"}> boardVoltage</option>
+                      <option value={"forwardEnergy"}> forwardEnergy</option>
+                      <option value={"reverseEnergy"}> reverseEnergy</option>
+                    </select>
+                  ) : alarmSensor.type === "WeatherStation" ? (
+                    <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
+                      <option value={""}></option>
+                      <option value={"emwAtmPres"}> Pressão Atmosférica</option>
+                      <option value={"emwAvgWindSpeed"}> Velocidade do Vento</option>
+                      <option value={"emwGustWindSpeed"}> Velocidade Rajada de Vento</option>
+                      <option value={"emwHumidity"}> Humidade</option>
+                      <option value={"emwLuminosity"}> Luminosidade</option>
+                      <option value={"emwRainLevel"}> Nivel de Chuva</option>
+                      <option value={"emwSolarRadiation"}> Radiação Solar</option>
+                      <option value={"emwTemperature"}> Temperatura</option>
+                      <option value={"emwUv"}> Índice UV</option>
+                    </select>
+                  ) : (
+                    <p></p>
+                  )
+                }
                 <p className="">Quando tocar</p>
                 <div className="flex">
                   <select className="border border-black rounded p-1 text-lg" value={triggerAt} onChange={(event) => setTriggerAt(event.target.value)}>
@@ -384,14 +421,14 @@ const Sensores = () => {
               >Criar alarme</button>
             </div>
           </div>
-          {/* <div className="mt-4 text-5xl text-center font-bold">
-            {!alarmError && newAlarm ? (
-              <p className="text-green-500">Alarme inserido com sucesso</p>
-            ) : alarmError && newAlarm ?(
-              <p className="text-red-500">Por favor, preencha todos os campos</p>
-            ) : <p></p>
-          }
-          </div> */}
+          <div className="mt-4 text-5xl text-center font-bold">
+            {triggerType == "" && alarmInsertAttempt ? (
+              <p className="text-red-500">Insira todos os dados</p>
+            ) : (
+              <p></p>
+            )
+            }
+          </div>
         </div>
       ) : (
         <div>
@@ -417,29 +454,11 @@ const Sensores = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="border rounded p-3 w-full focus:ring-2 focus:ring-blue-500"
                 />
-                <select
-                  value={selectedFilter}
-                  onChange={(e) => setSelectedFilter(e.target.value)}
-                  className="border rounded p-3 w-full md:w-1/4 focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="deveui">Deveui</option>
-                  <option value="local">Local</option>
-                  <option value="name">Nome</option>
-                  <option value="type">Tipo</option>
-                  <option value="boardVoltage">Board Voltage</option>
-                  <option value="batteryVoltage">Battery Voltage</option>
-                  <option value="humidity">Humidity</option>
-                  <option value="luminosity">Luminosity</option>
-                  <option value="temperature">Temperature</option>
-                  <option value="movement">Movement</option>
-                  <option value="pressure">Pressure</option>
-                  <option value="co2">CO2</option>
-                </select>
               </div>
 
               {/* Lista de Sensores */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {sensors.map((sensor, index) => (
+                {filteredSensores.map((sensor, index) => (
                   <div
                     key={index}
                     className="bg-white dark:bg-neutral-800 p-5 rounded-lg shadow-lg hover:shadow-2xl transition-shadow h-fit"
@@ -457,7 +476,7 @@ const Sensores = () => {
 
                     <ul className="text-sm space-y-2">
                       {
-                        sensor.type === "SmartLight" ? (
+                        sensor.type === "SmartLight" && sensor.fields[0] !== "Sensor Offline" ? (
                           <ul>
                             <li>
                               <strong>BatteryVoltage: </strong>{sensor.fields[0]}
@@ -478,7 +497,7 @@ const Sensores = () => {
                               <strong>Movement: </strong>{sensor.fields[5]}
                             </li>
                           </ul>
-                        ) : sensor.type === "WaterTankLevel" ? (
+                        ) : sensor.type === "WaterTankLevel" && sensor.fields[0] !== "Sensor Offline" ? (
                           <ul>
                             <li>
                               <strong>boardVoltage: </strong>{sensor.fields[0]}
@@ -487,7 +506,7 @@ const Sensores = () => {
                               <strong>Distância: </strong>{sensor.fields[1]}
                             </li>
                           </ul>
-                        ) : sensor.type === "Hydrometer" ? (
+                        ) : sensor.type === "Hydrometer" && sensor.fields[0] !== "Sensor Offline" ? (
                           <ul>
                             <li>
                               <strong>boardVoltage: </strong>{sensor.fields[0]}
@@ -496,7 +515,7 @@ const Sensores = () => {
                               <strong>Counter: </strong>{sensor.fields[1]}
                             </li>
                           </ul>
-                        ) : sensor.type === "EnergyMeter" ? (
+                        ) : sensor.type === "EnergyMeter" && sensor.fields[0] !== "Sensor Offline" ? (
                           <ul>
                             <li>
                               <strong>boardVoltage: </strong>{sensor.fields[0]}
@@ -508,7 +527,7 @@ const Sensores = () => {
                               <strong>ReverseEnergy: </strong>{sensor.fields[2]}
                             </li>
                           </ul>
-                        ) : sensor.type === "WeatherStation" ? (
+                        ) : sensor.type === "WeatherStation" && sensor.fields[0] !== "Sensor Offline" ? (
                           <ul>
                             <li>
                               <strong>Pressão Atmosférica: </strong>{sensor.fields[0]}
