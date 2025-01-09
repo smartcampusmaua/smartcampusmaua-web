@@ -239,15 +239,21 @@ const Sensores = () => {
           );
 
           if (isMissingInSensorsData) {
-            updatedSensores.push(
-              new GenericSensor(
-                sensorInfo.Nome,
-                sensorInfo.Tipo,
-                ["Sensor Offline"],
-                [sensorInfo.DEVEUI],
-                sensorInfo.Local,
-              )
-            )
+            const alreadyExists = updatedSensores.some(sensor =>
+              sanitize(sensor.tags[0]) === sanitize(sensorInfo.DEVEUI)
+            );
+
+            if (!alreadyExists) {
+              updatedSensores.push(
+                new GenericSensor(
+                  sanitize(sensorInfo.Nome),
+                  sanitize(sensorInfo.Tipo),
+                  ["Sensor Offline"],
+                  [sanitize(sensorInfo.DEVEUI)],
+                  sanitize(sensorInfo.Local)
+                )
+              );
+            }
           }
         });
 
@@ -457,7 +463,7 @@ const Sensores = () => {
 
                     <ul className="text-sm space-y-2">
                       {
-                        sensor.type === "SmartLight" ? (
+                        sensor.type === "SmartLight" && sensor.fields[0] !== "Sensor Offline" ? (
                           <ul>
                             <li>
                               <strong>BatteryVoltage: </strong>{sensor.fields[0]}
@@ -478,7 +484,7 @@ const Sensores = () => {
                               <strong>Movement: </strong>{sensor.fields[5]}
                             </li>
                           </ul>
-                        ) : sensor.type === "WaterTankLevel" ? (
+                        ) : sensor.type === "WaterTankLevel" && sensor.fields[0] !== "Sensor Offline" ? (
                           <ul>
                             <li>
                               <strong>boardVoltage: </strong>{sensor.fields[0]}
@@ -487,7 +493,7 @@ const Sensores = () => {
                               <strong>Distância: </strong>{sensor.fields[1]}
                             </li>
                           </ul>
-                        ) : sensor.type === "Hydrometer" ? (
+                        ) : sensor.type === "Hydrometer" && sensor.fields[0] !== "Sensor Offline" ? (
                           <ul>
                             <li>
                               <strong>boardVoltage: </strong>{sensor.fields[0]}
@@ -496,7 +502,7 @@ const Sensores = () => {
                               <strong>Counter: </strong>{sensor.fields[1]}
                             </li>
                           </ul>
-                        ) : sensor.type === "EnergyMeter" ? (
+                        ) : sensor.type === "EnergyMeter" && sensor.fields[0] !== "Sensor Offline" ? (
                           <ul>
                             <li>
                               <strong>boardVoltage: </strong>{sensor.fields[0]}
@@ -508,7 +514,7 @@ const Sensores = () => {
                               <strong>ReverseEnergy: </strong>{sensor.fields[2]}
                             </li>
                           </ul>
-                        ) : sensor.type === "WeatherStation" ? (
+                        ) : sensor.type === "WeatherStation" && sensor.fields[0] !== "Sensor Offline"? (
                           <ul>
                             <li>
                               <strong>Pressão Atmosférica: </strong>{sensor.fields[0]}
