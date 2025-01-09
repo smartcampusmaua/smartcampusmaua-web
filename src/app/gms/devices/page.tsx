@@ -349,6 +349,9 @@ const Sensores = () => {
                   {alarmSensor.name || "Nome não disponível"}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                  {alarmSensor.type}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
                   Local: {alarmSensor.local}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
@@ -365,16 +368,50 @@ const Sensores = () => {
                 <p>
                   Escolha o campo para o alarme
                 </p>
-                <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
-                  <option value={"boardVoltage"}> boardVoltage</option>
-                  <option value={"batteryVoltage"}> batteryVoltage</option>
-                  <option value={"humidity"}> humidity</option>
-                  <option value={"luminosity"}> luminosity</option>
-                  <option value={"temperature"}> temperature</option>
-                  <option value={"movement"}> movement</option>
-                  <option value={"pressure"}> pressure</option>
-                  <option value={"co2"}> co2</option>
-                </select>
+                {
+                  alarmSensor.type == "SmartLight" ? (
+                    <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
+                      <option value={"boardVoltage"}> boardVoltage</option>
+                      <option value={"batteryVoltage"}> batteryVoltage</option>
+                      <option value={"humidity"}> humidity</option>
+                      <option value={"luminosity"}> luminosity</option>
+                      <option value={"temperature"}> temperature</option>
+                      <option value={"movement"}> movement</option>
+                      <option value={"pressure"}> pressure</option>
+                      <option value={"co2"}> co2</option>
+                    </select>
+                  ) : alarmSensor.type === "WaterTankLevel" ? (
+                    <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
+                      <option value={"boardVoltage"}> boardVoltage</option>
+                      <option value={"distance"}> Distância</option>
+                    </select>
+                  ) : alarmSensor.type === "Hydrometer" ? (
+                    <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
+                      <option value={"boardVoltage"}> boardVoltage</option>
+                      <option value={"counter"}> Counter</option>
+                    </select>
+                  ) : alarmSensor.type === "EnergyMeter" ? (
+                    <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
+                      <option value={"boardVoltage"}> boardVoltage</option>
+                      <option value={"forwardEnergy"}> forwardEnergy</option>
+                      <option value={"reverseEnergy"}> reverseEnergy</option>
+                    </select>
+                  ) : alarmSensor.type === "WeatherStation" ? (
+                    <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
+                      <option value={"emwAtmPres"}> Pressão Atmosférica</option>
+                      <option value={"emwAvgWindSpeed"}> Velocidade do Vento</option>
+                      <option value={"emwGustWindSpeed"}> Velocidade Rajada de Vento</option>
+                      <option value={"emwHumidity"}> Humidade</option>
+                      <option value={"emwLuminosity"}> Luminosidade</option>
+                      <option value={"emwRainLevel"}> Nivel de Chuva</option>
+                      <option value={"emwSolarRadiation"}> Radiação Solar</option>
+                      <option value={"emwTemperature"}> Temperatura</option>
+                      <option value={"emwUv"}> Índice UV</option>
+                    </select>
+                  ) : (
+                    <p></p>
+                  )
+                }
                 <p className="">Quando tocar</p>
                 <div className="flex">
                   <select className="border border-black rounded p-1 text-lg" value={triggerAt} onChange={(event) => setTriggerAt(event.target.value)}>
@@ -514,7 +551,7 @@ const Sensores = () => {
                               <strong>ReverseEnergy: </strong>{sensor.fields[2]}
                             </li>
                           </ul>
-                        ) : sensor.type === "WeatherStation" && sensor.fields[0] !== "Sensor Offline"? (
+                        ) : sensor.type === "WeatherStation" && sensor.fields[0] !== "Sensor Offline" ? (
                           <ul>
                             <li>
                               <strong>Pressão Atmosférica: </strong>{sensor.fields[0]}
