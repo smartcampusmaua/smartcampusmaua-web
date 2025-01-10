@@ -63,7 +63,7 @@ const fetchSensors = async () => {
   const { data: sensorsInfo, error } = await supabase
     .from('Sensors')
     .select("Nome, DEVEUI, Local, Tipo");
-
+  
   if (error) {
     console.error('Error fetching sensors data: ', error);
     return;
@@ -71,7 +71,6 @@ const fetchSensors = async () => {
 
   const sensorsData = await fetchAllSensors();
   var updatedSensores = [];
-
   sensorsData.forEach(sensorData => {
     const isDuplicate = updatedSensores.some(
       sensor => sanitize(sensor.tags[0]) === sanitize(sensorData.tags.deviceId)
@@ -261,17 +260,14 @@ const fetchSensors = async () => {
       }
     }
   });
-
   sensorsInfo.forEach(sensorInfo => {
     const isMissingInSensorsData = !sensorsData.some(sensorData =>
       sanitize(sensorData.tags.deviceId) === sanitize(sensorInfo.DEVEUI)
     );
-
     if (isMissingInSensorsData) {
       const alreadyExists = updatedSensores.some(sensor =>
         sanitize(sensor.tags[0]) === sanitize(sensorInfo.DEVEUI)
       );
-
       if (!alreadyExists) {
         updatedSensores.push(
           new GenericSensor(
@@ -285,8 +281,7 @@ const fetchSensors = async () => {
       }
     }
   });
-
   return updatedSensores;
 };
 
-export { fetchSensors }
+export { fetchSmartLight, fetchAllSensors, fetchSensors }
