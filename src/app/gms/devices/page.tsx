@@ -3,277 +3,47 @@
 import Head from "next/head";
 import DashboardLayout from "@/app/gms/components/DashboardLayout";
 import { useState, useEffect } from "react";
-import { fetchAllSensors } from "@/database/timeseries";
-import {
-  // Luz, 
-  // Local, 
-  GenericSensor
-} from "@/database/dataTypes";
-import {
-  supabase,
-  // getData 
-} from '@/database/supabaseClient';
+import { GenericSensor } from "@/database/dataTypes";
+import { supabase } from '@/database/supabaseClient';
 import { formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import { fetchSensors } from '@/database/timeseries';
 
 const Sensores = () => {
-  const [sensors, setSensores] = useState<GenericSensor[]>([]);
+  const [sensors, setSensors] = useState<GenericSensor[]>([]);  
   const [loading, setLoading] = useState<boolean>(true);
   const [filteredSensores, setFilteredSensores] = useState<GenericSensor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const SMARTCAMPUSMAUA_SERVER = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}`;
 
-  const sanitize = (value: any) => (value === "" || value === null ? "Indisponível" : value);
 
   useEffect(() => {
-    const fetchSensors = async () => {
-      const { data: sensorsInfo, error } = await supabase
-        .from('Sensors')
-        .select("Nome, DEVEUI, Local, Tipo");
-
-      if (error) {
-        console.error('Error fetching sensors data: ', error);
-        return;
-      }
-
-      const sensorsData = await fetchAllSensors();
-
-      setSensores(prevSensores => {
-        const updatedSensores = [...prevSensores];
-
-        sensorsData.forEach(sensorData => {
-          const isDuplicate = updatedSensores.some(
-            sensor => sanitize(sensor.tags[0]) === sanitize(sensorData.tags.deviceId)
-          );
-          var sensorAlreadyExists = false;
-
-          if (!isDuplicate) {
-            let newSensor;
-            if (sensorData.name === "SmartLight" && !sensorAlreadyExists) {
-              sensorsInfo.forEach(sensorInfo => {
-                if (sensorInfo.DEVEUI == sensorData.tags.deviceId) {
-                  newSensor = new GenericSensor(
-                    sanitize(sensorInfo.Nome),
-                    sensorData.name,
-                    [
-                      sanitize((Number(sensorData.fields.batteryVoltage) / 1000).toFixed(1)) + " V",
-                      sanitize(sensorData.fields.boardVoltage) + " V",
-                      sanitize(sensorData.fields.humidity) + " %",
-                      sanitize((Math.pow(Number(sensorData.fields.luminosity), -3.746) * 140000000000000).toFixed(1)) + " lux",
-                      sanitize(sensorData.fields.temperature) + " °C",
-                      sanitize(sensorData.fields.movement)
-                    ],
-                    [sanitize(sensorData.tags.deviceId)],
-                    sanitize(sensorInfo.Local),
-                    new Date(Number(sensorData.timestamp) / 1e6)
-                  );
-                  sensorAlreadyExists = true;
-                }
-              });
-              if (!sensorAlreadyExists) {
-                newSensor = new GenericSensor(
-                  "Indisponível",
-                  sensorData.name,
-                  [
-                    sanitize((Number(sensorData.fields.batteryVoltage) / 1000).toFixed(1)) + " V",
-                    sanitize(sensorData.fields.boardVoltage) + " V",
-                    sanitize(sensorData.fields.humidity) + " %",
-                    sanitize((Math.pow(Number(sensorData.fields.luminosity), -3.746) * 140000000000000).toFixed(1)) + " lux",
-                    sanitize(sensorData.fields.temperature) + " °C",
-                    sanitize(sensorData.fields.movement)
-                  ],
-                  [sanitize(sensorData.tags.deviceId)],
-                  "Indisponível",
-                  new Date(Number(sensorData.timestamp) / 1e6)
-                );
-              }
-            } else if (sensorData.name === "WaterTankLevel") {
-              sensorsInfo.forEach(sensorInfo => {
-                if (sensorInfo.DEVEUI == sensorData.tags.deviceId) {
-                  newSensor = new GenericSensor(
-                    sanitize(sensorInfo.Nome),
-                    sensorData.name,
-                    [
-                      sanitize((sensorData.fields.boardVoltage).toFixed(1)) + " V",
-                      sanitize((Number(sensorData.fields.distance) / 1000).toFixed(1)) + " metros"
-                    ],
-                    [sanitize(sensorData.tags.deviceId)],
-                    sanitize(sensorInfo.Local),
-                    new Date(Number(sensorData.timestamp) / 1e6)
-                  );
-                  sensorAlreadyExists = true;
-                }
-              });
-              if (!sensorAlreadyExists) {
-                newSensor = new GenericSensor(
-                  "Indisponível",
-                  sensorData.name,
-                  [
-                    sanitize((sensorData.fields.boardVoltage).toFixed(1)) + " V",
-                    sanitize((Number(sensorData.fields.distance) / 1000).toFixed(1)) + " metros"
-                  ],
-                  [sanitize(sensorData.tags.deviceId)],
-                  "Indisponível",
-                  new Date(Number(sensorData.timestamp) / 1e6)
-                );
-              }
-            } else if (sensorData.name === "Hydrometer") {
-              sensorsInfo.forEach(sensorInfo => {
-                if (sensorInfo.DEVEUI == sensorData.tags.deviceId) {
-                  newSensor = new GenericSensor(
-                    sanitize(sensorInfo.Nome),
-                    sensorData.name,
-                    [
-                      sanitize(sensorData.fields.boardVoltage).toFixed(1) + " V",
-                      sanitize(sensorData.fields.counter)
-                    ],
-                    [sanitize(sensorData.tags.deviceId)],
-                    sanitize(sensorInfo.Local),
-                    new Date(Number(sensorData.timestamp) / 1e6)
-                  );
-                  sensorAlreadyExists = true;
-                }
-              });
-              if (!sensorAlreadyExists) {
-                newSensor = new GenericSensor(
-                  "Indisponível",
-                  sensorData.name,
-                  [
-                    sanitize(sensorData.fields.boardVoltage).toFixed(1) + " V",
-                    sanitize(sensorData.fields.counter)
-                  ],
-                  [sanitize(sensorData.tags.deviceId)],
-                  "Indisponível",
-                  new Date(Number(sensorData.timestamp) / 1e6)
-                );
-              }
-            } else if (sensorData.name === "EnergyMeter") {
-              sensorsInfo.forEach(sensorInfo => {
-                if (sensorInfo.DEVEUI == sensorData.tags.deviceId) {
-                  newSensor = new GenericSensor(
-                    sanitize(sensorInfo.Nome),
-                    sensorData.name,
-                    [
-                      sanitize(sensorData.fields.boardVoltage).toFixed(1) + " V",
-                      sanitize(sensorData.fields.forwardEnergy).toFixed(1) + " kWh",
-                      sanitize(sensorData.fields.reverseEnergy).toFixed(1) + " kWh"
-                    ],
-                    [sanitize(sensorData.tags.deviceId)],
-                    sanitize(sensorInfo.Local),
-                    new Date(Number(sensorData.timestamp) / 1e6)
-                  );
-                  sensorAlreadyExists = true;
-                }
-              });
-              if (!sensorAlreadyExists) {
-                newSensor = new GenericSensor(
-                  "Indisponível",
-                  sensorData.name,
-                  [
-                    sanitize(sensorData.fields.boardVoltage).toFixed(1) + " V",
-                    sanitize(sensorData.fields.forwardEnergy).toFixed(1) + " kWh",
-                    sanitize(sensorData.fields.reverseEnergy).toFixed(1) + " kWh"
-                  ],
-                  [sanitize(sensorData.tags.deviceId)],
-                  "Indisponível",
-                  new Date(Number(sensorData.timestamp) / 1e6)
-                );
-              }
-            } else if (sensorData.name === "WeatherStation") {
-              sensorsInfo.forEach(sensorInfo => {
-                if (sensorInfo.DEVEUI == sensorData.tags.deviceId) {
-                  newSensor = new GenericSensor(
-                    sanitize(sensorInfo.Nome),
-                    sensorData.name,
-                    [
-                      sanitize(sensorData.fields.emwAtmPres),
-                      sanitize(sensorData.fields.emwAvgWindSpeed),
-                      sanitize(sensorData.fields.emwGustWindSpeed),
-                      sanitize(sensorData.fields.emwHumidity) + " %",
-                      sanitize(sensorData.fields.emwLuminosity),
-                      sanitize(sensorData.fields.emwRainLevel),
-                      sanitize(sensorData.fields.emwSolarRadiation),
-                      sanitize(sensorData.fields.emwTemperature) + " °C",
-                      sanitize(sensorData.fields.emwUv)
-                    ],
-                    [sanitize(sensorData.tags.deviceId)],
-                    sanitize(sensorInfo.Local),
-                    new Date(Number(sensorData.timestamp) / 1e6)
-                  );
-                  sensorAlreadyExists = true;
-                }
-              });
-              if (!sensorAlreadyExists) {
-                newSensor = new GenericSensor(
-                  "Indisponível",
-                  sensorData.name,
-                  [
-                    sanitize(sensorData.fields.emwAtmPres),
-                    sanitize(sensorData.fields.emwAvgWindSpeed),
-                    sanitize(sensorData.fields.emwGustWindSpeed),
-                    sanitize(sensorData.fields.emwHumidity) + " %",
-                    sanitize(sensorData.fields.emwLuminosity),
-                    sanitize(sensorData.fields.emwRainLevel),
-                    sanitize(sensorData.fields.emwSolarRadiation),
-                    sanitize(sensorData.fields.emwTemperature) + " °C",
-                    sanitize(sensorData.fields.emwUv)
-                  ],
-                  [sanitize(sensorData.tags.deviceId)],
-                  "Indisponível",
-                  new Date(Number(sensorData.timestamp) / 1e6)
-                );
-              }
-            }
-
-            if (newSensor) {
-              updatedSensores.push(newSensor);
-            }
-          }
-        });
-
-        sensorsInfo.forEach(sensorInfo => {
-          const isMissingInSensorsData = !sensorsData.some(sensorData =>
-            sanitize(sensorData.tags.deviceId) === sanitize(sensorInfo.DEVEUI)
-          );
-
-          if (isMissingInSensorsData) {
-            const alreadyExists = updatedSensores.some(sensor =>
-              sanitize(sensor.tags[0]) === sanitize(sensorInfo.DEVEUI)
-            );
-
-            if (!alreadyExists) {
-              updatedSensores.push(
-                new GenericSensor(
-                  sanitize(sensorInfo.Nome),
-                  sanitize(sensorInfo.Tipo),
-                  ["Sensor Offline"],
-                  [sanitize(sensorInfo.DEVEUI)],
-                  sanitize(sensorInfo.Local)
-                )
-              );
-            }
-          }
-        });
-
-        return updatedSensores;
-      });
+    async function getSensors() {
+      setSensors(await fetchSensors());
 
       setLoading(false);
-    };
+    }
 
-    fetchSensors();
+    getSensors();
   }, []);
 
 
   // Filtra os sensores com base no filtro e na busca
   useEffect(() => {
     const filtered = sensors.filter((sensor) => {
-      return Object.values(sensor).some((value) => 
+      return Object.values(sensor).some((value) =>
         value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
       );
     });
     setFilteredSensores(filtered);
   }, [searchQuery, sensors]);
+
+  const [exportInfoPopupOpen, setExportInfoPopupOpen] = useState(false);
+  const [selectedSensorsExport, setSelectedSensorsExport] = useState([]);
+  const [selectedSensor, setSelectedSensor] = useState<GenericSensor>();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [interval, setInterval] = useState(30); // Estado para armazenar o intervalo de dias na exportação (.csv) de um sensor
 
   const [alarmPopupOpen, setAlarmPopupOpen] = useState(false);
   const [alarmSensor, setAlarmSensor] = useState<GenericSensor>();
@@ -312,15 +82,388 @@ const Sensores = () => {
               alreadyPlayed: false
             },
           ]);
-          if (!error) setAlarmInsertAttempt(false);
+        if (!error) setAlarmInsertAttempt(false);
       }
-    } 
+    }
 
     if (alarmInsertAttempt === true) setAlarmPopupOpen(false);
   }
 
+  const addSensorToList = (sensor) => {
+    const isSensorAlreadyAdded = selectedSensorsExport.some(existingSensor => existingSensor.name === sensor.name);
+  
+    if (isSensorAlreadyAdded) {
+      alert("Este sensor já foi adicionado à lista.");
+      return;
+    }
+  
+    setSelectedSensorsExport([...selectedSensorsExport, sensor]);
+  };
+  const removeSensorFromList = (index) => {
+    const updatedSensors = selectedSensorsExport.filter((_, i) => i !== index);
+    setSelectedSensorsExport(updatedSensors);
+  };
+
+  const getMaxDate = () => {
+    const today = new Date();
+    today.setDate(today.getDate() - 30);
+    return today.toISOString().split("T")[0]; 
+  };
+
+  const calculateMinutesInterval = (date: string) => {
+    const selectedDate = new Date(date);
+    const today = new Date();
+    const diffTime = today.getTime() - selectedDate.getTime();
+    return Math.ceil(diffTime / (1000 * 60)); 
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.value;
+    const interval = calculateMinutesInterval(selected);
+
+    if (interval > 43200 || interval <= 0 || Number.isNaN(interval)) {
+      alert("Por favor, selecione uma data dentro dos últimos 30 dias ou no máximo 43200 minutos.");
+      setSelectedDate("");
+      setInterval(30);
+    } else {
+      setSelectedDate(selected);
+      setInterval(interval);
+    }
+  };
+
+  const handleExportSensor = async (measurement, id, interval) => {
+  
+    try {
+      const url = `https://smartcampus-k8s.maua.br/api/timeseries/v0.3/IMT/LNS/${measurement}/deviceId/${id}?interval=${interval}`;
+      
+      const response = await fetch(url);
+  
+      if (!response.ok) {
+        throw new Error("Erro ao obter os dados da API");
+      }
+  
+      const jsonData = await response.json();
+  
+      const jsonToCsv = (json) => {
+        if (!Array.isArray(json) || json.length === 0) {
+          throw new Error("JSON inválido ou vazio");
+        }
+  
+        const extractKeys = (obj, prefix = "") =>
+          Object.keys(obj).reduce((keys, key) => {
+            const value = obj[key];
+            if (typeof value === "object" && value !== null) {
+              return keys.concat(extractKeys(value, `${prefix}${key}.`));
+            }
+            return keys.concat(`${prefix}${key}`);
+          }, []);
+  
+        const headers = [
+          ...new Set(
+            json.flatMap((item) => extractKeys(item))
+          )
+        ];
+  
+        const rows = json.map((row) => {
+          return headers.map((header) => {
+            const keys = header.split(".");
+            let value = row;
+  
+            for (const key of keys) {
+              value = value?.[key] ?? ""; 
+            }
+            return typeof value === "object" ? "" : value;
+          }).join(",");
+        }).join("\n");
+  
+        return `${headers.join(",")}\n${rows}`;
+      };
+  
+      const csvData = jsonToCsv(jsonData);
+  
+      const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+
+      const link = document.createElement("a");
+
+      const urlBlob = URL.createObjectURL(blob);
+
+      link.href = urlBlob;
+      link.download = `${measurement}-${id}-${interval}_minutes.csv`;
+
+      document.body.appendChild(link);
+      link.click();
+      
+      document.body.removeChild(link);
+      URL.revokeObjectURL(urlBlob);
+
+    } catch (error) {
+      console.error("Erro ao processar os dados:", error);
+    }
+  };
+  
+  
+  const handleListExportSensors = async (interval) => {
+    try {
+      const sensorIds = selectedSensorsExport.map((sensor) => sensor.tags[0]);
+      const allData = [];
+  
+      for (const id of sensorIds) {
+        const sensor = selectedSensorsExport.find(sensor => sensor.tags[0] === id);
+        const measurement = sensor.type;
+  
+        console.log(`Buscando dados para o sensor ${id}, Measurement: ${measurement}, Intervalo: ${interval}`);
+  
+        const url = `https://smartcampus-k8s.maua.br/api/timeseries/v0.3/IMT/LNS/${measurement}/deviceId/${id}?interval=${interval}`;
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+          const errorText = await response.text();  
+          console.error(`Erro ao obter dados do sensor ID ${id} com measurement ${measurement}: ${errorText}`);
+          continue;
+        }
+  
+        const jsonData = await response.json();
+        allData.push(...jsonData);
+      }
+  
+      if (allData.length === 0) {
+        console.warn("Nenhum dado foi coletado para os sensores selecionados.");
+        return;
+      }
+  
+      const jsonToCsv = (json) => {
+        if (!Array.isArray(json) || json.length === 0) {
+          throw new Error("JSON inválido ou vazio");
+        }
+  
+        const extractKeys = (obj, prefix = "") =>
+          Object.keys(obj).reduce((keys, key) => {
+            const value = obj[key];
+            if (typeof value === "object" && value !== null) {
+              return keys.concat(extractKeys(value, `${prefix}${key}.`));
+            }
+            return keys.concat(`${prefix}${key}`);
+          }, []);
+  
+        const headers = [
+          ...new Set(
+            json.flatMap((item) => extractKeys(item))
+          )
+        ];
+  
+        const rows = json.map((row) => {
+          return headers.map((header) => {
+            const keys = header.split(".");
+            let value = row;
+  
+            for (const key of keys) {
+              value = value?.[key] ?? "";
+            }
+            return typeof value === "object" ? "" : value;
+          }).join(",");
+        }).join("\n");
+  
+        return `${headers.join(",")}\n${rows}`;
+      };
+  
+      const csvData = jsonToCsv(allData);
+      const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const urlBlob = URL.createObjectURL(blob);
+  
+      link.href = urlBlob;
+      link.download = `sensors-data-${Date.now()}.csv`;
+  
+      document.body.appendChild(link);
+      link.click();
+      
+      document.body.removeChild(link);
+      URL.revokeObjectURL(urlBlob);
+  
+      console.log("Exportação concluída com sucesso!");
+  
+    } catch (error) {
+      console.error("Erro ao processar os dados:", error);
+    }
+  };
+  
+  
+
   return (
     <DashboardLayout>
+      {exportInfoPopupOpen ? (
+        <div className="flex flex-col w-full">
+          <div className="m-4">
+            <button
+              onClick={() => setExportInfoPopupOpen(!exportInfoPopupOpen)}
+              className="m-2 bg-red-500 hover:bg-red-700 text-white text-2xl font-bold py-3 px-6 rounded">
+              Voltar
+            </button>
+          </div>
+          <div className="container max-w-screen-lg mx-auto grid grid-cols-1 sm:grid-cols-2 justify-items-center">
+          <div className="m-2 flex justify-center h-fit max-w-[24rem] border border-gray-400 bg-gray-50 rounded">
+              <div className="m-2">
+                <p className="font-bold text-3xl text-center">Sensor Selecionado</p>
+                <h2 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300 text-center">
+                  {selectedSensor.name || "Nome não disponível"}
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                  Local: {selectedSensor.local}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                  DEVEUI: {selectedSensor.tags[0]}
+                </p>
+                <ul className="text-sm space-y-2">
+                {
+                        selectedSensor.type === "SmartLight" && selectedSensor.fields[0] !== "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>BatteryVoltage: </strong>{selectedSensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>BoardVoltage: </strong>{selectedSensor.fields[1]}
+                            </li>
+                            <li>
+                              <strong>Humidade: </strong>{selectedSensor.fields[2]}
+                            </li>
+                            <li>
+                              <strong>Luminosidade: </strong>{selectedSensor.fields[3]}
+                            </li>
+                            <li>
+                              <strong>Temperatura: </strong>{selectedSensor.fields[4]}
+                            </li>
+                            <li>
+                              <strong>Movement: </strong>{selectedSensor.fields[5]}
+                            </li>
+                          </ul>
+                        ) : selectedSensor.type === "WaterTankLevel" && selectedSensor.fields[0] !== "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>boardVoltage: </strong>{selectedSensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>Distância: </strong>{selectedSensor.fields[1]}
+                            </li>
+                          </ul>
+                        ) : selectedSensor.type === "Hydrometer" && selectedSensor.fields[0] !== "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>boardVoltage: </strong>{selectedSensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>Counter: </strong>{selectedSensor.fields[1]}
+                            </li>
+                          </ul>
+                        ) : selectedSensor.type === "EnergyMeter" && selectedSensor.fields[0] !== "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>boardVoltage: </strong>{selectedSensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>ForwardEnergy: </strong>{selectedSensor.fields[1]}
+                            </li>
+                            <li>
+                              <strong>ReverseEnergy: </strong>{selectedSensor.fields[2]}
+                            </li>
+                          </ul>
+                        ) : selectedSensor.type === "WeatherStation" && selectedSensor.fields[0] !== "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>Pressão Atmosférica: </strong>{selectedSensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>Velocidade do Vento: </strong>{selectedSensor.fields[1]}
+                            </li>
+                            <li>
+                              <strong>Velocidade Rajada de Vento: </strong>{selectedSensor.fields[2]}
+                            </li>
+                            <li>
+                              <strong>Humidade: </strong>{selectedSensor.fields[3]}
+                            </li>
+                            <li>
+                              <strong>Luminosidade: </strong>{selectedSensor.fields[4]}
+                            </li>
+                            <li>
+                              <strong>Nivel de Chuva: </strong>{selectedSensor.fields[5]}
+                            </li>
+                            <li>
+                              <strong>Radiação Solar: </strong>{selectedSensor.fields[6]}
+                            </li>
+                            <li>
+                              <strong>Temperatura: </strong>{selectedSensor.fields[7]}
+                            </li>
+                            <li>
+                              <strong>Índice UV: </strong>{selectedSensor.fields[8]}
+                            </li>
+                          </ul>
+                        ) : selectedSensor.fields[0] === "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>Sensor Offline</strong>
+                            </li>
+                          </ul>
+                        ) : (
+                          <p></p>
+                        )
+                      }
+                      {selectedSensor.timestamp && (
+                        <li>
+                          <strong>Atualizado há: </strong> {formatDistanceToNow(new Date(selectedSensor.timestamp), { locale: pt })}
+                        </li>
+                      )}
+                </ul>
+              </div>
+            </div>
+            {/* Field to define the time interval */}
+            <div className="m-2 flex justify-center h-fit max-w-[24rem] bg-grey-500 rounded">
+              <div className="m-2">
+                <label htmlFor="dateInput" className="text-black font-bold">
+                  Selecione uma data (máximo: últimos 30 dias):
+                </label>
+                <input
+                  type="date"
+                  id="dateInput"
+                  value={selectedDate}
+                  onChange={handleDateChange}
+                  max={new Date().toISOString().split("T")[0]} 
+                  min={getMaxDate()} 
+                  className="py-2 px-4 rounded border"
+                />
+                <label htmlFor="minutesInput" className="text-black font-bold mt-4 block">
+                Escolha um intervalo de tempo em minutos:
+              </label>
+              <input
+                type="number"
+                id="minutesInput"
+                value={interval}
+                onChange={(e) => setInterval(Number(e.target.value))}
+                min={1} 
+                max={43200} 
+                className="py-2 px-4 rounded border w-full"
+                placeholder="Digite o período em minutos"
+              />
+                {interval !== null && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    Você selecionou um período de {interval} minutos.<br/>Aproximadamente {Math.round(interval / 1440)} dias.
+                  </p>
+                )}
+              </div>
+              
+              <div className="m-2">
+                <button
+                  onClick={() => {
+                    setExportInfoPopupOpen(false);
+                    handleExportSensor(selectedSensor.type, selectedSensor.tags[0], interval);
+                  }}
+                  className="bg-left text-white font-bold py-2 px-4 rounded border border-green-400 bg-green-400 hover:bg-green-700 "
+                >
+                  Exportar .csv
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {alarmPopupOpen ? (
         <div className="flex flex-col w-full">
           <div className="m-4">
@@ -430,7 +573,8 @@ const Sensores = () => {
             }
           </div>
         </div>
-      ) : (
+      ) : null}
+      {!exportInfoPopupOpen && !alarmPopupOpen && (
         <div>
           <Head>
             <title>Dados de Sensores | EcoVision GMS</title>
@@ -442,10 +586,93 @@ const Sensores = () => {
             </div>
           ) : (
             <div className="container mx-auto p-8">
-              {/* Título */}
+              {/* Title */}
               <h1 className="text-3xl font-bold mb-8 text-center">Dados dos Sensores</h1>
 
-              {/* Barra de Pesquisa e Filtro */}
+             {/* Button to show or hide the list */}
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="mb-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg "
+              >
+                {isDropdownOpen ? "Esconder lista de sensores" : "Lista de sensores"}
+              </button>
+
+              {isDropdownOpen && (
+                <div className="absolute bg-gray-50 border rounded-lg shadow-lg mt-2 w-80 max-h-80 overflow-y-auto transition-all duration-300 ease-in-out opacity-0 transform translate-y-4 opacity-100 translate-y-0">
+                  <ul className="space-y-3 p-4">
+                    {selectedSensorsExport.length === 0 ? (
+                      <div className="text-center text-gray-600">Selecione sensores para exportar seus dados em .csv</div>
+                    ) : (
+                      selectedSensorsExport.map((sensor, index) => (
+                        <li key={index} className="border-b pb-3 flex justify-between items-center">
+                          <div>
+                            <p className="font-semibold text-lg">{sensor.name || 'Nome não disponível'}</p>
+                            <p className="text-sm text-gray-500">Local: {sensor.local}</p>
+                            <p className="text-sm text-gray-500">DEVEUI: {sensor.tags[0]}</p>
+                          </div>
+                          <button
+                            onClick={() => removeSensorFromList(index)}
+                            className="text-red-500 hover:text-red-700 ml-2"
+                            aria-label="Remover sensor"
+                          >
+                            X
+                          </button>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+
+                  {/* Field to define the time interval */}
+                  {selectedSensorsExport.length > 0 && (
+                    <div className="mt-4 p-4 shadow-md">
+                      <div className="mb-4">
+                        <label htmlFor="interval" className="block text-sm font-medium text-gray-700">Intervalo:</label>
+                        <input
+                          type="date"
+                          id="dateInput"
+                          value={selectedDate}
+                          onChange={handleDateChange}
+                          max={new Date().toISOString().split("T")[0]} 
+                          min={getMaxDate()} 
+                          className="w-full py-2 px-4 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                        />
+                      </div>
+                      
+                      <div className="mb-4">
+                        <label htmlFor="minutesInput" className="block text-sm font-medium text-gray-700">Escolha um intervalo de tempo em minutos:</label>
+                        <input
+                          type="number"
+                          id="minutesInput"
+                          value={interval}
+                          onChange={(e) => setInterval(Number(e.target.value))}
+                          min={1} 
+                          max={43200} 
+                          className="w-full py-2 px-4 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                          placeholder="Digite o período em minutos"
+                        />
+                        {interval !== null && (
+                          <p className="text-sm text-gray-600 mt-2">
+                            Você selecionou um período de {interval} minutos. Aproximadamente {Math.round(interval / 1440)} dias.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Export Button */}
+                  {selectedSensorsExport.length > 0 && (
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        onClick={() => handleListExportSensors(interval)}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      >
+                        Exportar .csv
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Search Bar */}
               <div className="flex flex-col md:flex-row md:justify-around gap-4 mb-8">
                 <input
                   type="text"
@@ -456,7 +683,7 @@ const Sensores = () => {
                 />
               </div>
 
-              {/* Lista de Sensores */}
+              {/* List of sensors */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredSensores.map((sensor, index) => (
                   <div
@@ -574,10 +801,27 @@ const Sensores = () => {
                       )}
                     </ul>
                     <div>
-                      <button onClick={() => { setAlarmPopupOpen(!alarmPopupOpen); setAlarmSensor(sensor) }} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                      <button onClick={() => { setAlarmPopupOpen(!alarmPopupOpen); setAlarmSensor(sensor) }} className="bg-blue-500  hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                         Adicionar Alarme
                       </button>
                     </div>
+                    <div className="flex mt-2 space-x-2">
+                    <button
+                      onClick={() => {
+                        setExportInfoPopupOpen(true);
+                        setSelectedSensor(sensor); 
+                      }}
+                      className="w-1/2 bg-blue-500 text-white font-bold py-3 px-6 rounded-l-lg hover:bg-blue-600"
+                    >
+                      Exportar .csv
+                    </button>
+                    <button
+                      onClick={() => addSensorToList(sensor)}
+                      className="w-1/2 bg-blue-500 text-white font-bold py-3 px-6 rounded-r-lg hover:bg-blue-600"
+                    >
+                      Adicionar à lista
+                    </button>
+                  </div>
                   </div>
                 ))}
               </div>
