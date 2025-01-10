@@ -87,12 +87,12 @@ const fetchSensors = async () => {
               sanitize(sensorInfo.Nome),
               sensorData.name,
               [
-                sanitize((Number(sensorData.fields.batteryVoltage) / 1000).toFixed(1)) + " V",
                 sanitize(sensorData.fields.boardVoltage) + " V",
+                sanitize((Number(sensorData.fields.batteryVoltage) / 1000).toFixed(1)) + " V",
                 sanitize(sensorData.fields.humidity) + " %",
                 sanitize((Math.pow(Number(sensorData.fields.luminosity), -3.746) * 140000000000000).toFixed(1)) + " lux",
-                sanitize(sensorData.fields.temperature) + " °C",
-                sanitize(sensorData.fields.movement)
+                sanitize(sensorData.fields.movement),
+                sanitize(sensorData.fields.temperature) + " °C"
               ],
               [sanitize(sensorData.tags.deviceId)],
               sanitize(sensorInfo.Local),
@@ -106,12 +106,12 @@ const fetchSensors = async () => {
             "Indisponível",
             sensorData.name,
             [
-              sanitize((Number(sensorData.fields.batteryVoltage) / 1000).toFixed(1)) + " V",
               sanitize(sensorData.fields.boardVoltage) + " V",
+              sanitize((Number(sensorData.fields.batteryVoltage) / 1000).toFixed(1)) + " V",
               sanitize(sensorData.fields.humidity) + " %",
               sanitize((Math.pow(Number(sensorData.fields.luminosity), -3.746) * 140000000000000).toFixed(1)) + " lux",
-              sanitize(sensorData.fields.temperature) + " °C",
-              sanitize(sensorData.fields.movement)
+              sanitize(sensorData.fields.movement),
+              sanitize(sensorData.fields.temperature) + " °C"
             ],
             [sanitize(sensorData.tags.deviceId)],
             "Indisponível",
@@ -289,4 +289,4 @@ const fetchSensors = async () => {
   return updatedSensores;
 };
 
-export { fetchSmartLight, fetchAllSensors, fetchSensors }
+export { fetchSensors }
