@@ -58,25 +58,24 @@ const Sensores = () => {
     }
     else {
       if (triggerType !== "") {
-        const { data, error } = await supabase
-          .from('Alarms')
-          .insert([
-            {
-              userId: userData[0].id,
-              type: alarmSensor.type,
-              local: alarmSensor.local,
-              deveui: alarmSensor.tags[0],
-              trigger: trigger,
-              triggerAt: triggerAt,
-              triggerType: triggerType,
-              alreadyPlayed: false
-            },
-          ]);
-        if (!error) setAlarmInsertAttempt(false);
+        const { data, error } = await supabase.from('Alarms').insert([
+          {
+            userId: userData[0].id,
+            type: alarmSensor.type,
+            local: alarmSensor.local,
+            deveui: alarmSensor.tags[0],
+            trigger: trigger,
+            triggerAt: triggerAt,
+            triggerType: triggerType,
+            alreadyPlayed: false
+          },
+        ]);
+        if (!error) {
+          setAlarmInsertAttempt(false);
+          setAlarmPopupOpen(false);
+        }
       }
     }
-
-    if (alarmInsertAttempt === true) setAlarmPopupOpen(false);
   }
 
   return (
@@ -127,8 +126,6 @@ const Sensores = () => {
                       <option value={"luminosity"}> luminosity</option>
                       <option value={"temperature"}> temperature</option>
                       <option value={"movement"}> movement</option>
-                      <option value={"pressure"}> pressure</option>
-                      <option value={"co2"}> co2</option>
                     </select>
                   ) : alarmSensor.type === "WaterTankLevel" ? (
                     <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
@@ -140,7 +137,7 @@ const Sensores = () => {
                     <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
                       <option value={""}></option>
                       <option value={"boardVoltage"}> boardVoltage</option>
-                      <option value={"counter"}> Counter</option>
+                      <option value={"counter"}> counter</option>
                     </select>
                   ) : alarmSensor.type === "EnergyMeter" ? (
                     <select className="border border-black rounded p-1 text-lg" value={triggerType} onChange={(event) => setTriggerType(event.target.value)}>
