@@ -4,8 +4,11 @@ import Head from 'next/head';
 import DashboardLayout from "@/app/gms/components/DashboardLayout";
 import { useState, useEffect } from 'react';
 import { GenericSensor, AlarmeValue } from '@/database/dataTypes';
-import { fetchSensors } from '@/database/timeseries';
+import { fetchSensorByDEVEUI, fetchSensors } from '@/database/timeseries';
+import { formatDistanceToNow } from 'date-fns';
+
 import { supabase } from '@/database/supabaseClient';
+import { ptBR } from 'date-fns/locale';
 
 const Alarmes = () => {
   const SMARTCAMPUSMAUA_SERVER = `${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_URL}:${process.env.NEXT_PUBLIC_SMARTCAMPUSMAUA_SERVER_PORT}`;
@@ -19,6 +22,7 @@ const Alarmes = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedAlarme, setSelectedAlarme] = useState<AlarmeValue>();
   const [sendingNewAlarm, setSendingNewAlarm] = useState<boolean>(false);
+  const [selectedSensor, setSelectedSensor] = useState<GenericSensor | null>(null);
 
   useEffect(() => {
     async function getSensors() {
@@ -28,6 +32,126 @@ const Alarmes = () => {
 
     getSensors();
   }, []);
+  const SensorDetails = ({ sensor }: { sensor: GenericSensor | null }) => {
+    if (!sensor) {
+      return <p className="text-center text-gray-500">Nenhum sensor selecionado</p>;
+    }
+  
+    return (
+      <div className="m-4 p-4 border border-gray-400 bg-gray-50 rounded">
+        <h2 className="text-2xl font-bold text-center mb-4">{sensor.name || "Nome não disponível"}</h2>
+        <h2 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300 text-center">{sensor.type || "Nome não disponível"}</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+          Local: {sensor.local}
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+          DEVEUI: {sensor.tags[0]}
+        </p>
+        <ul className="text-sm space-y-2">
+        {
+          sensor.type === "SmartLight" && sensor.fields[0] !== "Sensor Offline" ? (
+            <ul>
+              <li>
+                <strong>BatteryVoltage: </strong>{sensor.fields[0]}
+              </li>
+              <li>
+                <strong>BoardVoltage: </strong>{sensor.fields[1]}
+              </li>
+              <li>
+                <strong>Humidade: </strong>{sensor.fields[2]}
+              </li>
+              <li>
+                <strong>Luminosidade: </strong>{sensor.fields[3]}
+              </li>
+              <li>
+                <strong>Movement: </strong>{sensor.fields[4]}
+              </li>
+              <li>
+                <strong>Temperatura: </strong>{sensor.fields[5]}
+              </li>
+            </ul>
+          ) : sensor.type === "WaterTankLevel" && sensor.fields[0] !== "Sensor Offline" ? (
+            <ul>
+              <li>
+                <strong>boardVoltage: </strong>{sensor.fields[0]}
+              </li>
+              <li>
+                <strong>Distância: </strong>{sensor.fields[1]}
+              </li>
+            </ul>
+          ) : sensor.type === "Hydrometer" && sensor.fields[0] !== "Sensor Offline" ? (
+            <ul>
+              <li>
+                <strong>boardVoltage: </strong>{sensor.fields[0]}
+              </li>
+              <li>
+                <strong>Counter: </strong>{sensor.fields[1]}
+              </li>
+            </ul>
+          ) : sensor.type === "EnergyMeter" && sensor.fields[0] !== "Sensor Offline" ? (
+            <ul>
+              <li>
+                <strong>boardVoltage: </strong>{sensor.fields[0]}
+              </li>
+              <li>
+                <strong>ForwardEnergy: </strong>{sensor.fields[1]}
+              </li>
+              <li>
+                <strong>ReverseEnergy: </strong>{sensor.fields[2]}
+              </li>
+            </ul>
+          ) : sensor.type === "WeatherStation" && sensor.fields[0] !== "Sensor Offline" ? (
+            <ul>
+              <li>
+                <strong>Pressão Atmosférica: </strong>{sensor.fields[0]}
+              </li>
+              <li>
+                <strong>Velocidade do Vento: </strong>{sensor.fields[1]}
+              </li>
+              <li>
+                <strong>Velocidade Rajada de Vento: </strong>{sensor.fields[2]}
+              </li>
+              <li>
+                <strong>Humidade: </strong>{sensor.fields[3]}
+              </li>
+              <li>
+                <strong>Luminosidade: </strong>{sensor.fields[4]}
+              </li>
+              <li>
+                <strong>Nivel de Chuva: </strong>{sensor.fields[5]}
+              </li>
+              <li>
+                <strong>Radiação Solar: </strong>{sensor.fields[6]}
+              </li>
+              <li>
+                <strong>Temperatura: </strong>{sensor.fields[7]}
+              </li>
+              <li>
+                <strong>Índice UV: </strong>{sensor.fields[8]}
+              </li>
+              <li>
+              <strong>C1State: </strong>{sensor.fields[9]}
+              </li>
+              <li>
+                <strong>C2State: </strong>{sensor.fields[10]}
+              </li>
+            </ul>
+          ) : sensor.fields[0] === "Sensor Offline" ? (
+            <ul>
+              <li>
+                <strong>Sensor Offline</strong>
+              </li>
+            </ul>
+          ) : (
+            <p></p>
+          )
+        }
+          <li><strong>Última atualização:</strong> {formatDistanceToNow(new Date(sensor.timestamp), { locale: ptBR })}</li>
+        </ul>
+      </div>
+    );
+  };
+  
 
   async function deleteAlarme(alarme) {
     const { data, error } = await supabase
@@ -180,6 +304,8 @@ const Alarmes = () => {
   }, [sensors, sendingNewAlarm]);
 
   const openEditPopup = (alarme: AlarmeValue) => {
+    const sensor = sensors.find((sensor) => sensor.tags.includes(alarme.deveui));
+    setSelectedSensor(sensor || null);
     const newSelectedAlarme = new AlarmeValue(
       alarme.id,
       alarme.userId,
@@ -269,16 +395,8 @@ const Alarmes = () => {
             <div className="container max-w-screen-lg mx-auto grid grid-cols-1 sm:grid-cols-2 justify-items-center">
               <div className="m-2 flex justify-center h-fit max-w-[24rem] border border-gray-400 bg-gray-50 rounded">
                 <div className="m-2">
-                  <p className="font-bold text-3xl text-center">Alarme Selecionado</p>
-                  <h2 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300 text-center">
-                    {selectedAlarme.type || "Nome não disponível"}
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
-                    Local: {selectedAlarme.local}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
-                    DEVEUI: {selectedAlarme.deveui}
-                  </p>
+                  <p className="font-bold text-3xl text-center">Alarme Selecionado</p>                 
+                  <SensorDetails sensor={selectedSensor} />
                   <ul className="text-sm space-y-2 font-bold">
                     <li>
                       Tipo: {selectedAlarme.type}
@@ -337,6 +455,8 @@ const Alarmes = () => {
                       <option value={"emwSolarRadiation"}> Radiação Solar</option>
                       <option value={"emwTemperature"}> Temperatura</option>
                       <option value={"emwUv"}> Índice UV</option>
+                      <option value={"c1State"}> c1State</option>
+                      <option value={"c2State"}> c2State</option>
                     </select>
                   ) : (
                     <p></p>
@@ -425,19 +545,46 @@ const Alarmes = () => {
                         <p className={`mr-2 font-medium ${isTriggered ? "text-red-100" : "text-black"}`}>
                           Tocar: {alarme.triggerAt == 'higher' ? "Acima de " : "Abaixo de "}{alarme.trigger}{
                             alarme.triggerType === "boardVoltage" ? "V" :
-                              alarme.triggerType === "batteryVoltage" ? "V" :
-                                alarme.triggerType === "humidity" ? "%" :
-                                  alarme.triggerType === "luminosity" ? " lux" :
-                                    alarme.triggerType === "temperature" ? "°C" : ""
+                            alarme.triggerType === "batteryVoltage" ? "V" :
+                            alarme.triggerType === "humidity" ? "%" :
+                            alarme.triggerType === "luminosity" ? " lux" :
+                            alarme.triggerType === "temperature" ? "°C" :
+                            alarme.triggerType === "movement" ? " movimentos" :
+                            alarme.triggerType === "distance" ? " m" :
+                            alarme.triggerType === "counter" ? " contagem" :
+                            alarme.triggerType === "forwardEnergy" ? " kWh" :
+                            alarme.triggerType === "reverseEnergy" ? " kWh" :
+                            alarme.triggerType === "emwAtmPres" ? " hPa" :
+                            alarme.triggerType === "c1State" ? "" :
+                            alarme.triggerType === "c2State" ? "" :                            
+                            alarme.triggerType === "emwAvgWindSpeed" ? " m/s" :
+                            alarme.triggerType === "emwGustWindSpeed" ? " m/s" :
+                            alarme.triggerType === "emwRainLevel" ? " mm" :
+                            alarme.triggerType === "emwSolarRadiation" ? " W/m²" :
+                            alarme.triggerType === "emwUv" ? " UV" : ""
                           }
                         </p>
                         <p className={`mr-2 font-medium ${isTriggered ? "text-red-100" : "text-black"}`}>
                           Valor atual: {String(alarme.currentValue)}{
                             alarme.triggerType === "boardVoltage" ? "V" :
-                              alarme.triggerType === "batteryVoltage" ? "V" :
-                                alarme.triggerType === "humidity" ? "%" :
-                                  alarme.triggerType === "luminosity" ? "lux" :
-                                    alarme.triggerType === "temperature" ? "°C" : ""
+                            alarme.triggerType === "batteryVoltage" ? "V" :
+                            alarme.triggerType === "humidity" ? "%" :
+                            alarme.triggerType === "luminosity" ? " lux" :
+                            alarme.triggerType === "temperature" ? "°C" :
+                            alarme.triggerType === "movement" ? "" : 
+                            alarme.triggerType === "distance" ? " m" :
+                            alarme.triggerType === "counter" ? "" : 
+                            alarme.triggerType === "forwardEnergy" ? " kWh" :
+                            alarme.triggerType === "reverseEnergy" ? " kWh" :
+                            alarme.triggerType === "emwAtmPres" ? " atm" :
+                            alarme.triggerType === "c1State" ? "" :
+                            alarme.triggerType === "c2State" ? "" :
+                            alarme.triggerType === "windSpeed" ? " m/s" :
+                            alarme.triggerType === "windGustSpeed" ? " m/s" :
+                            alarme.triggerType === "rainLevel" ? " mm" :
+                            alarme.triggerType === "solarRadiation" ? " W/m²" :
+                            alarme.triggerType === "uvIndex" ? "" : 
+                            ""
                           }
                         </p>
                       </h1>

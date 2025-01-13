@@ -326,10 +326,10 @@ const Sensores = () => {
                               <strong>Luminosidade: </strong>{selectedSensor.fields[3]}
                             </li>
                             <li>
-                              <strong>Temperatura: </strong>{selectedSensor.fields[4]}
+                              <strong>Movement: </strong>{selectedSensor.fields[4]}
                             </li>
                             <li>
-                              <strong>Movement: </strong>{selectedSensor.fields[5]}
+                              <strong>Temperatura: </strong>{selectedSensor.fields[5]}
                             </li>
                           </ul>
                         ) : selectedSensor.type === "WaterTankLevel" && selectedSensor.fields[0] !== "Sensor Offline" ? (
@@ -390,6 +390,12 @@ const Sensores = () => {
                             </li>
                             <li>
                               <strong>Índice UV: </strong>{selectedSensor.fields[8]}
+                            </li>
+                            <li>
+                              <strong>C1State: </strong>{selectedSensor.fields[9]}
+                            </li>
+                            <li>
+                              <strong>C2State: </strong>{selectedSensor.fields[10]}
                             </li>
                           </ul>
                         ) : selectedSensor.fields[0] === "Sensor Offline" ? (
@@ -471,7 +477,7 @@ const Sensores = () => {
           </div>
           <div className="container max-w-screen-lg mx-auto grid grid-cols-1 sm:grid-cols-2 justify-items-center">
             <div className="m-2 flex justify-center h-fit max-w-[24rem] border border-gray-400 bg-gray-50 rounded">
-              <div className="m-2">
+            <div className="m-2">
                 <p className="font-bold text-3xl text-center">Sensor Selecionado</p>
                 <h2 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300 text-center">
                   {alarmSensor.name || "Nome não disponível"}
@@ -486,7 +492,109 @@ const Sensores = () => {
                   DEVEUI: {alarmSensor.tags[0]}
                 </p>
                 <ul className="text-sm space-y-2">
-                  {alarmSensor.timestamp && <li><strong>Atualizado há:</strong> {formatDistanceToNow(new Date(alarmSensor.timestamp), { locale: pt })}</li>}
+                {
+                        alarmSensor.type === "SmartLight" && alarmSensor.fields[0] !== "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>BatteryVoltage: </strong>{alarmSensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>BoardVoltage: </strong>{alarmSensor.fields[1]}
+                            </li>
+                            <li>
+                              <strong>Humidade: </strong>{alarmSensor.fields[2]}
+                            </li>
+                            <li>
+                              <strong>Luminosidade: </strong>{alarmSensor.fields[3]}
+                            </li>
+                            <li>
+                              <strong>Movement: </strong>{alarmSensor.fields[4]}
+                            </li>
+                            <li>
+                              <strong>Temperatura: </strong>{alarmSensor.fields[5]}
+                            </li>
+                          </ul>
+                        ) : alarmSensor.type === "WaterTankLevel" && alarmSensor.fields[0] !== "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>boardVoltage: </strong>{alarmSensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>Distância: </strong>{alarmSensor.fields[1]}
+                            </li>
+                          </ul>
+                        ) : alarmSensor.type === "Hydrometer" && alarmSensor.fields[0] !== "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>boardVoltage: </strong>{alarmSensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>Counter: </strong>{alarmSensor.fields[1]}
+                            </li>
+                          </ul>
+                        ) : alarmSensor.type === "EnergyMeter" && alarmSensor.fields[0] !== "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>boardVoltage: </strong>{alarmSensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>ForwardEnergy: </strong>{alarmSensor.fields[1]}
+                            </li>
+                            <li>
+                              <strong>ReverseEnergy: </strong>{alarmSensor.fields[2]}
+                            </li>
+                          </ul>
+                        ) : alarmSensor.type === "WeatherStation" && alarmSensor.fields[0] !== "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>Pressão Atmosférica: </strong>{alarmSensor.fields[0]}
+                            </li>
+                            <li>
+                              <strong>Velocidade do Vento: </strong>{alarmSensor.fields[1]}
+                            </li>
+                            <li>
+                              <strong>Velocidade Rajada de Vento: </strong>{alarmSensor.fields[2]}
+                            </li>
+                            <li>
+                              <strong>Humidade: </strong>{alarmSensor.fields[3]}
+                            </li>
+                            <li>
+                              <strong>Luminosidade: </strong>{alarmSensor.fields[4]}
+                            </li>
+                            <li>
+                              <strong>Nivel de Chuva: </strong>{alarmSensor.fields[5]}
+                            </li>
+                            <li>
+                              <strong>Radiação Solar: </strong>{alarmSensor.fields[6]}
+                            </li>
+                            <li>
+                              <strong>Temperatura: </strong>{alarmSensor.fields[7]}
+                            </li>
+                            <li>
+                              <strong>Índice UV: </strong>{alarmSensor.fields[8]}
+                            </li>
+                            <li>
+                              <strong>C1State: </strong>{alarmSensor.fields[9]}
+                            </li>
+                            <li>
+                              <strong>C2State: </strong>{alarmSensor.fields[10]}
+                            </li>
+                          </ul>
+                        ) : alarmSensor.fields[0] === "Sensor Offline" ? (
+                          <ul>
+                            <li>
+                              <strong>Sensor Offline</strong>
+                            </li>
+                          </ul>
+                        ) : (
+                          <p></p>
+                        )
+                      }
+                      {alarmSensor.timestamp && (
+                        <li>
+                          <strong>Atualizado há: </strong> {formatDistanceToNow(new Date(alarmSensor.timestamp), { locale: pt })}
+                        </li>
+                      )}
                 </ul>
               </div>
             </div>
@@ -538,6 +646,8 @@ const Sensores = () => {
                       <option value={"emwSolarRadiation"}> Radiação Solar</option>
                       <option value={"emwTemperature"}> Temperatura</option>
                       <option value={"emwUv"}> Índice UV</option>
+                      <option value={"c1State"}> C1State</option>
+                      <option value={"c2State"}> C2State</option>
                     </select>
                   ) : (
                     <p></p>
@@ -712,10 +822,10 @@ const Sensores = () => {
                               <strong>Luminosidade: </strong>{sensor.fields[3]}
                             </li>
                             <li>
-                              <strong>Temperatura: </strong>{sensor.fields[4]}
+                              <strong>Movement: </strong>{sensor.fields[4]}
                             </li>
                             <li>
-                              <strong>Movement: </strong>{sensor.fields[5]}
+                              <strong>Temperatura: </strong>{sensor.fields[5]}
                             </li>
                           </ul>
                         ) : sensor.type === "WaterTankLevel" && sensor.fields[0] !== "Sensor Offline" ? (
@@ -776,6 +886,12 @@ const Sensores = () => {
                             </li>
                             <li>
                               <strong>Índice UV: </strong>{sensor.fields[8]}
+                            </li>
+                            <li>
+                              <strong>C1State: </strong>{sensor.fields[9]}
+                            </li>
+                            <li>
+                              <strong>C2State: </strong>{sensor.fields[10]}
                             </li>
                           </ul>
                         ) : sensor.fields[0] === "Sensor Offline" ? (
