@@ -215,16 +215,18 @@ const fetchSensors = async () => {
             newSensor = new GenericSensor(
               sanitize(sensorInfo.Nome),
               sensorData.name,
-              [
-                sanitize(sensorData.fields.emwAtmPres),
-                sanitize(sensorData.fields.emwAvgWindSpeed),
-                sanitize(sensorData.fields.emwGustWindSpeed),
+              [           
+                sanitize(sensorData.fields.emwAtmPres) + " atm",
+                sanitize(sensorData.fields.emwAvgWindSpeed) + " m/s",
+                sanitize(sensorData.fields.emwGustWindSpeed) + " m/s",
                 sanitize(sensorData.fields.emwHumidity) + " %",
-                sanitize(sensorData.fields.emwLuminosity),
-                sanitize(sensorData.fields.emwRainLevel),
-                sanitize(sensorData.fields.emwSolarRadiation),
+                sanitize(sensorData.fields.emwLuminosity) + " lux",
+                sanitize(sensorData.fields.emwRainLevel) + " mm",
+                sanitize(sensorData.fields.emwSolarRadiation) + " W/m²",
                 sanitize(sensorData.fields.emwTemperature) + " °C",
-                sanitize(sensorData.fields.emwUv)
+                sanitize(sensorData.fields.emwUv) + " UV index",
+                sanitize(sensorData.fields.c1State).toString(),
+                sanitize(sensorData.fields.c2State).toString(),     
               ],
               [sanitize(sensorData.tags.deviceId)],
               sanitize(sensorInfo.Local),
@@ -238,15 +240,17 @@ const fetchSensors = async () => {
             "Indisponível",
             sensorData.name,
             [
-              sanitize(sensorData.fields.emwAtmPres),
-              sanitize(sensorData.fields.emwAvgWindSpeed),
-              sanitize(sensorData.fields.emwGustWindSpeed),
+              sanitize(sensorData.fields.emwAtmPres) + " atm",
+              sanitize(sensorData.fields.emwAvgWindSpeed) + " m/s",
+              sanitize(sensorData.fields.emwGustWindSpeed) + " m/s",
               sanitize(sensorData.fields.emwHumidity) + " %",
-              sanitize(sensorData.fields.emwLuminosity),
-              sanitize(sensorData.fields.emwRainLevel),
-              sanitize(sensorData.fields.emwSolarRadiation),
+              sanitize(sensorData.fields.emwLuminosity) + " lux",
+              sanitize(sensorData.fields.emwRainLevel) + " mm",
+              sanitize(sensorData.fields.emwSolarRadiation) + " W/m²",
               sanitize(sensorData.fields.emwTemperature) + " °C",
-              sanitize(sensorData.fields.emwUv)
+              sanitize(sensorData.fields.emwUv) + " UV index",
+              sanitize(sensorData.fields.c1State).toString(),
+              sanitize(sensorData.fields.c2State).toString(),       
             ],
             [sanitize(sensorData.tags.deviceId)],
             "Indisponível",
@@ -284,4 +288,45 @@ const fetchSensors = async () => {
   return updatedSensores;
 };
 
-export { fetchSmartLight, fetchAllSensors, fetchSensors }
+async function fetchSensorByDEVEUI(deveui: string) {
+  const allSensors = await fetchAllSensors();
+
+  const matchingSensor = allSensors.find(
+    sensorData => sanitize(sensorData.tags.deviceId) === sanitize(deveui)
+  );
+
+  if (!matchingSensor) {
+    console.error(`Sensor com DEVEUI ${deveui} não encontrado.`);
+    return null;
+  }
+
+  const { data: sensorsInfo, error } = await supabase
+    .from('Sensors')
+    .select("Nome, DEVEUI, Local, Tipo")
+    .eq("DEVEUI", deveui);
+
+  if (error || !sensorsInfo || sensorsInfo.length === 0) {
+    console.error(`Erro ao buscar informações do sensor no banco: `, error);
+    return null;
+  }
+
+  const sensorInfo = sensorsInfo[0];
+  const sensor = new GenericSensor(
+    sanitize(sensorInfo.Nome),
+    matchingSensor.name,
+    [
+      sanitize(matchingSensor.fields.boardVoltage) + " V",
+      sanitize((Number(matchingSensor.fields.batteryVoltage) / 1000).toFixed(1)) + " V",
+      sanitize(matchingSensor.fields.humidity) + " %",
+      sanitize(matchingSensor.fields.temperature) + " °C"
+    ],
+    [sanitize(matchingSensor.tags.deviceId)],
+    sanitize(sensorInfo.Local),
+    new Date(Number(matchingSensor.timestamp) / 1e6)
+  );
+
+  return sensor;
+}
+
+
+export { fetchSmartLight, fetchAllSensors, fetchSensors, fetchSensorByDEVEUI }
