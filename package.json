@@ -13,6 +13,7 @@
 		"@supabase/supabase-js": "^2.47.10",
 		"chart.js": "^4.4.7",
 		"date-fns": "^4.1.0",
+		"mqtt": "^5.10.3",
 		"n": "^9.2.1",
 		"next": "15.1.1-canary.25",
 		"papaparse": "^5.4.1",
