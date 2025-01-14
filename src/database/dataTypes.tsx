@@ -48,6 +48,28 @@ class AlarmeValue {
   }
 }
 
+class AlarmeHistory {
+  type: string; // Smartlight
+  local: string;
+  deveui: string;
+  trigger: string;
+  triggerAt: string; // higher / lower than trigger
+  triggerType: string; // boardVoltage
+  currentValue: number;
+  lastPlayed: Date;
+
+  constructor(type: string, local: string, deveui: string, trigger: string, triggerAt: string, triggerType: string, currentValue: number, lastPlayed: Date) {
+    this.deveui = deveui;
+    this.trigger = trigger;
+    this.triggerAt = triggerAt;
+    this.triggerType = triggerType;
+    this.local = local;
+    this.type = type;
+    this.currentValue = currentValue;
+    this.lastPlayed = lastPlayed;
+  }
+}
+
 class GenericSensor {
   constructor(
     public name: string, // DET-20
@@ -59,4 +81,4 @@ class GenericSensor {
   ) { }
 }
 
-export { Alarme, GenericSensor, AlarmeValue }
+export { Alarme, GenericSensor, AlarmeValue, AlarmeHistory }
