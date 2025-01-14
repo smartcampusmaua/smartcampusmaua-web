@@ -391,12 +391,6 @@ const Sensores = () => {
                             <li>
                               <strong>Índice UV: </strong>{selectedSensor.fields[8]}
                             </li>
-                            <li>
-                              <strong>C1State: </strong>{selectedSensor.fields[9]}
-                            </li>
-                            <li>
-                              <strong>C2State: </strong>{selectedSensor.fields[10]}
-                            </li>
                           </ul>
                         ) : selectedSensor.fields[0] === "Sensor Offline" ? (
                           <ul>
@@ -573,12 +567,6 @@ const Sensores = () => {
                             <li>
                               <strong>Índice UV: </strong>{alarmSensor.fields[8]}
                             </li>
-                            <li>
-                              <strong>C1State: </strong>{alarmSensor.fields[9]}
-                            </li>
-                            <li>
-                              <strong>C2State: </strong>{alarmSensor.fields[10]}
-                            </li>
                           </ul>
                         ) : alarmSensor.fields[0] === "Sensor Offline" ? (
                           <ul>
@@ -646,8 +634,6 @@ const Sensores = () => {
                       <option value={"emwSolarRadiation"}> Radiação Solar</option>
                       <option value={"emwTemperature"}> Temperatura</option>
                       <option value={"emwUv"}> Índice UV</option>
-                      <option value={"c1State"}> C1State</option>
-                      <option value={"c2State"}> C2State</option>
                     </select>
                   ) : (
                     <p></p>
@@ -886,12 +872,6 @@ const Sensores = () => {
                             </li>
                             <li>
                               <strong>Índice UV: </strong>{sensor.fields[8]}
-                            </li>
-                            <li>
-                              <strong>C1State: </strong>{sensor.fields[9]}
-                            </li>
-                            <li>
-                              <strong>C2State: </strong>{sensor.fields[10]}
                             </li>
                           </ul>
                         ) : sensor.fields[0] === "Sensor Offline" ? (

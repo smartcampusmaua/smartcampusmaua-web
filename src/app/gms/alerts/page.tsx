@@ -129,12 +129,6 @@ const Alarmes = () => {
               <li>
                 <strong>Índice UV: </strong>{sensor.fields[8]}
               </li>
-              <li>
-              <strong>C1State: </strong>{sensor.fields[9]}
-              </li>
-              <li>
-                <strong>C2State: </strong>{sensor.fields[10]}
-              </li>
             </ul>
           ) : sensor.fields[0] === "Sensor Offline" ? (
             <ul>
@@ -455,8 +449,6 @@ const Alarmes = () => {
                       <option value={"emwSolarRadiation"}> Radiação Solar</option>
                       <option value={"emwTemperature"}> Temperatura</option>
                       <option value={"emwUv"}> Índice UV</option>
-                      <option value={"c1State"}> c1State</option>
-                      <option value={"c2State"}> c2State</option>
                     </select>
                   ) : (
                     <p></p>
@@ -554,9 +546,7 @@ const Alarmes = () => {
                             alarme.triggerType === "counter" ? " contagem" :
                             alarme.triggerType === "forwardEnergy" ? " kWh" :
                             alarme.triggerType === "reverseEnergy" ? " kWh" :
-                            alarme.triggerType === "emwAtmPres" ? " hPa" :
-                            alarme.triggerType === "c1State" ? "" :
-                            alarme.triggerType === "c2State" ? "" :                            
+                            alarme.triggerType === "emwAtmPres" ? " atm" :                          
                             alarme.triggerType === "emwAvgWindSpeed" ? " m/s" :
                             alarme.triggerType === "emwGustWindSpeed" ? " m/s" :
                             alarme.triggerType === "emwRainLevel" ? " mm" :
@@ -577,8 +567,6 @@ const Alarmes = () => {
                             alarme.triggerType === "forwardEnergy" ? " kWh" :
                             alarme.triggerType === "reverseEnergy" ? " kWh" :
                             alarme.triggerType === "emwAtmPres" ? " atm" :
-                            alarme.triggerType === "c1State" ? "" :
-                            alarme.triggerType === "c2State" ? "" :
                             alarme.triggerType === "windSpeed" ? " m/s" :
                             alarme.triggerType === "windGustSpeed" ? " m/s" :
                             alarme.triggerType === "rainLevel" ? " mm" :
