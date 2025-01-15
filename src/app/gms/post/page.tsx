@@ -15,7 +15,7 @@ const PostPage = () => {
   const handlePost = async () => {
 
     try {
-      const url = `https://smartcampus-k8s.maua.br/api/ingestion/v0.1/IMT/LNS/all`;
+      const url = `https://smartcampus-k8s.maua.br/api/ingestion/v0.1/IMT/LNS/Downlink/all`;
       const payload = {
         "application": "DET", // Application Name registered in the corresponding NetworkServer
         "etc": "imt", // NetworkServer to be queued
