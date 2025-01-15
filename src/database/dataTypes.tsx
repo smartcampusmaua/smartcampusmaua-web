@@ -8,8 +8,10 @@ class Alarme {
   triggerAt: string; // higher / lower than trigger
   triggerType: string; // boardVoltage
   alreadyPlayed: boolean;
+  actionSensor: string
 
-  constructor(id: number, userId: number, type: string, local: string, deveui: string, trigger: string, triggerAt: string, triggerType: string, alreadyPlayed: boolean) {
+
+  constructor(id: number, userId: number, type: string, local: string, deveui: string, trigger: string, triggerAt: string, triggerType: string, alreadyPlayed: boolean, actionSensor: string) {
     this.id = id;
     this.userId = userId;
     this.deveui = deveui;
@@ -19,6 +21,7 @@ class Alarme {
     this.local = local;
     this.type = type;
     this.alreadyPlayed = alreadyPlayed;
+    this.actionSensor= actionSensor;
   }
 }
 
@@ -32,9 +35,10 @@ class AlarmeValue {
   triggerAt: string; // higher / lower than trigger
   triggerType: string; // boardVoltage
   alreadyPlayed: boolean;
-  currentValue: number
+  currentValue: number;
+  actionSensor: string
 
-  constructor(id: number, userId: number, type: string, local: string, deveui: string, trigger: string, triggerAt: string, triggerType: string, alreadyPlayed: boolean, currentValue: number) {
+  constructor(id: number, userId: number, type: string, local: string, deveui: string, trigger: string, triggerAt: string, triggerType: string, alreadyPlayed: boolean, currentValue: number, actionSensor: string) {
     this.id = id;
     this.userId = userId;
     this.deveui = deveui;
@@ -45,6 +49,7 @@ class AlarmeValue {
     this.type = type;
     this.alreadyPlayed = alreadyPlayed;
     this.currentValue = currentValue;
+    this.actionSensor= actionSensor;
   }
 }
 
@@ -57,8 +62,9 @@ class AlarmeHistory {
   triggerType: string; // boardVoltage
   currentValue: number;
   lastPlayed: Date;
+  actionSensor: string
 
-  constructor(type: string, local: string, deveui: string, trigger: string, triggerAt: string, triggerType: string, currentValue: number, lastPlayed: Date) {
+  constructor(type: string, local: string, deveui: string, trigger: string, triggerAt: string, triggerType: string, currentValue: number, lastPlayed: Date, actionSensor: string) {
     this.deveui = deveui;
     this.trigger = trigger;
     this.triggerAt = triggerAt;
@@ -67,6 +73,7 @@ class AlarmeHistory {
     this.type = type;
     this.currentValue = currentValue;
     this.lastPlayed = lastPlayed;
+    this.actionSensor= actionSensor;
   }
 }
 

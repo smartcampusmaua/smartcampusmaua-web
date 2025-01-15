@@ -33,5 +33,5 @@ export async function middleware(request: NextRequest) {
 
 // Define as rotas ou padrões de URL que o middleware deve aplicar
 export const config = {
-  matcher: ['/','/modulos','/devices', '/alerts', '/settings', '/evse'], // Adapte para as suas rotas protegidas
+  matcher: ['/','/modulos','/devices', '/alerts', '/settings', '/evse', '/post'], // Adapte para as suas rotas protegidas
 };

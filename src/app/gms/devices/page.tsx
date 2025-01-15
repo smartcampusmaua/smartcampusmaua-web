@@ -47,6 +47,7 @@ const Sensores = () => {
   const [triggerType, setTriggerType] = useState('');
   const [trigger, setTrigger] = useState<string>('0');
   const [triggerAt, setTriggerAt] = useState<string>('higher');
+  const [actionSensor, setActionSensor] = useState<string>();
   const [alarmInsertAttempt, setAlarmInsertAttempt] = useState<boolean>(false);
 
   const handleNewAlarm = async () => {
@@ -74,7 +75,8 @@ const Sensores = () => {
             trigger: trigger,
             triggerAt: triggerAt,
             triggerType: triggerType,
-            alreadyPlayed: false
+            alreadyPlayed: false,
+            actionSensor: actionSensor
           },
         ]);
         if (!error) {
@@ -639,13 +641,21 @@ const Sensores = () => {
                     <p></p>
                   )
                 }
-                <p className="">Quando tocar</p>
+                <p className="mt-2">Quando tocar</p>
                 <div className="flex">
                   <select className="border border-black rounded p-1 text-lg" value={triggerAt} onChange={(event) => setTriggerAt(event.target.value)}>
                     <option value={"higher"}> Acima de</option>
                     <option value={"lower"}> Abaixo de</option>
                   </select>
                   <input type="text" id="alarmTrigger" className="mx-1 w-32 border border-black rounded p-1 text-lg" placeholder="Valor" required value={trigger} onChange={(event) => setTrigger(event.target.value)} />
+                </div>
+                <p className="mt-2">Ação a realizar ao tocar o alarme</p>
+                <div className="flex">
+                  <select className="border border-black rounded p-1 text-lg" value={actionSensor} onChange={(event) => setActionSensor(event.target.value)}>
+                    <option value={""}></option>
+                    <option value={"sprinklersOn"}> Acionar Irrigadores</option>
+                    <option value={"sprinklersOff"}> Desligar Irrigadores</option>
+                  </select>
                 </div>
               </div>
               <button
